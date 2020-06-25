@@ -291,7 +291,8 @@ const ChatList = () => {
   const chats = useSelector(state => state.chatReducer.chats)
   const user = useSelector(state => state.userReducer.user)
   const activeChat = useSelector(state => state.chatReducer.activeChat)
-
+  console.log('chats: ', chats)
+  
   return (
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat) => {
@@ -301,13 +302,13 @@ const ChatList = () => {
           //     return name !== props.user.name
           // }) || "Community"
           // const classNames = (activeChat && activeChat.id === chat.id) ? 'active' : ''
-          const name = chat.isCommunity ? chat.name : createChatNameFromUser(chat.users, user)
+          const name = chat.name
           return (
             <div
               className={classes.chats}
               style={{ height: 48, margin: '1vh 0.8vw', }}
-              key={chat.id}
-              onClick={() => { dispatch(setActiveChat(chat)) }}
+              key={chat._id}
+              onClick={() => { dispatch(setActiveChat(chat)); console.log('active chat: ', activeChat) }}
 
             >
               <Grid container>

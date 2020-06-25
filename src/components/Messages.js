@@ -110,7 +110,7 @@ const Messages = (props) => {
         {
           store.getState().chatReducer.activeChat.typingUsers.map((name) => {
             return (
-              <TypingIndicator key={activeChat.id} typing={`${name} is typing`} />
+              <TypingIndicator key={activeChat._id} typing={`${name} is typing`} />
             )
           })
         }

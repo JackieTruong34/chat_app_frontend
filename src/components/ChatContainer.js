@@ -16,7 +16,7 @@ const ChatContainer = () => {
   const socket = useSelector(state => state.socketReducer.socket)
   const user = useSelector(state => state.userReducer.user)
   const chats = useSelector(state => state.chatReducer.chats)
-
+  const activeChat = useSelector(state => state.chatReducer.activeChat)
   const store = useStore()
   const dispatch = useDispatch()
 
@@ -26,13 +26,13 @@ const ChatContainer = () => {
   }, [])
 
   var initSocket = (socket) => {
-    socket.emit(COMMUNITY_CHAT, resetChat)
+    // socket.emit(COMMUNITY_CHAT, resetChat)
     // listen on private message namespace
     socket.on(PRIVATE_CHAT, addChat)
 
-    socket.once('connect', () => {
-      socket.emit(COMMUNITY_CHAT, resetChat)
-    })
+    // socket.once('connect', () => {
+    //   socket.emit(COMMUNITY_CHAT, resetChat)
+    // })
 
     // listen on event when user is connected
     socket.on(USER_CONNECTED, (connectedUsers) => {
@@ -65,6 +65,7 @@ const ChatContainer = () => {
 
   var addChat = (chat, reset = false) => {
     const newChats = reset ? [chat] : [...store.getState().chatReducer.chats, chat]
+    console.log('chat: ', chat)
 
     dispatch(setChats(newChats))
     dispatch(setActiveChat(chat))

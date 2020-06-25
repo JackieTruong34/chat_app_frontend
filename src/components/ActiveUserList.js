@@ -32,11 +32,11 @@ const useStyles = makeStyles((theme) => ({
 
 const ActiveUser = (props) => {
   return (
-    <ListItem button onClick={() => props.handleOnClick(props.userName)}>
+    <ListItem button onClick={() => props.handleOnClick(props.user)}>
       <ListItemIcon>
-        <IconButton>{props.userName[0].toUpperCase()}</IconButton>
+        <IconButton>{props.user.name[0].toUpperCase()}</IconButton>
       </ListItemIcon>
-      <ListItemText primary={props.userName} />
+      <ListItemText primary={props.user.name} />
     </ListItem>
   )
 }
@@ -51,10 +51,10 @@ const ActiveUserList = () => {
   const chats = useSelector(state => state.chatReducer.chats)
 
   const sendPrivateMessage = (receivers) => {
-    socket.emit(PRIVATE_CHAT, { sender: user.name, receivers, chats })
+    socket.emit(PRIVATE_CHAT, { sender: user, receivers, chats })
 
   }
-  console.log('connected users: ', store.getState().userReducer.userList)
+  // console.log('connected users: ', store.getState().userReducer.userList)
 
   var handleOnClick = (receiver) => {
     sendPrivateMessage([receiver])
@@ -74,7 +74,7 @@ const ActiveUserList = () => {
           {/*filter all users that is not current user  */}
           {userList.filter(otherUser => otherUser.name !== user.name).map((user) => {
             return (
-              <ActiveUser key={user.id} userName={user.name} handleOnClick={handleOnClick} />
+              <ActiveUser key={user.id} user={user} handleOnClick={handleOnClick} />
             )
           })}
 
