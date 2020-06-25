@@ -48,6 +48,7 @@ const AddIconModal = () => {
   const [open, setOpen] = React.useState(false)
   const [receivers, setReceivers] = React.useState([])
 
+  console.log('user list: ', userList)
   const addUserToChat = (receivers) => {
     if (receivers) {
       socket.emit(ADD_USER_TO_CHAT, { receivers, activeChat, chats: store.getState().chatReducer.chats })
@@ -69,9 +70,6 @@ const AddIconModal = () => {
       setReceivers(receivers => [...receivers, receiver])
 
     }
-
-    
-
   }
 
   return (
@@ -124,13 +122,12 @@ const AddIconModal = () => {
             </div>
 
             <List component="nav" aria-label="main mailbox folders" className={classes.list}>
-              {userList.filter(onlineUser => !store.getState().chatReducer.activeChat.users.includes(onlineUser.name)).length !== 0 ?
-                (userList.filter(onlineUser => !store.getState().chatReducer.activeChat.users.includes(onlineUser.name)).map((activeUser) => {
+              {userList.filter(onlineUser => !store.getState().chatReducer.activeChat.users.includes(onlineUser._id)).length !== 0 ?
+                (userList.filter(onlineUser => !store.getState().chatReducer.activeChat.users.includes(onlineUser._id)).map((activeUser) => {
                   return (
-                    <ListItem key={activeUser.id} button onClick={() => {
-                      console.log('receiver: ', activeUser);
+                    <ListItem key={activeUser._id} button onClick={() => {
                       // sendPrivateMessage(activeUser);
-                      handleChooseReceivers(activeUser.name);
+                      handleChooseReceivers(activeUser);
                     }}>
                       <ListItemIcon>
                         <IconButton>{activeUser.name[0].toUpperCase()}</IconButton>

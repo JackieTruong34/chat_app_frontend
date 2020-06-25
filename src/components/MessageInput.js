@@ -38,7 +38,7 @@ const MessageInput = (props) => {
 
   var handleSubmit = (e) => {
     e.preventDefault()
-    sendMessage(activeChat.id, message)
+    sendMessage(activeChat._id, message)
     setMessage("")
 
   }
@@ -47,7 +47,7 @@ const MessageInput = (props) => {
     lastUpdateTime = Date.now()
     if (!isTyping) {
       setIsTyping(true)
-      sendTyping(activeChat.id, true)
+      sendTyping(activeChat._id, true)
       startCheckingTyping()
     }
   }
@@ -64,7 +64,7 @@ const MessageInput = (props) => {
   var stopCheckingTyping = () => {
     if (typingInterval) {
       clearInterval(typingInterval)
-      sendTyping(activeChat.id, false)
+      sendTyping(activeChat._id, false)
     }
   }
 

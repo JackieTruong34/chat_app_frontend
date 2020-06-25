@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 // create user
 const createUser = ({name= "", socketId=null} = {})=>(
   {
-    id: mongoose.Types.ObjectId(),
+    _id: mongoose.Types.ObjectId(),
     name,
     socketId
   }
@@ -13,7 +13,7 @@ const createUser = ({name= "", socketId=null} = {})=>(
 
 // create message
 const createMessage = ({message="", sender=""} = {})=>({
-  id: mongoose.Types.ObjectId(),
+  _id: mongoose.Types.ObjectId(),
   time: getTime(new Date(Date.now())),
   message,
   sender

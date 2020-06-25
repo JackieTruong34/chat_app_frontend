@@ -291,7 +291,6 @@ const ChatList = () => {
   const chats = useSelector(state => state.chatReducer.chats)
   const user = useSelector(state => state.userReducer.user)
   const activeChat = useSelector(state => state.chatReducer.activeChat)
-  console.log('chats: ', chats)
   
   return (
     <div className="active-chat" style={{ marginTop: '2vh' }}>

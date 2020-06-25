@@ -70,14 +70,14 @@ const ChatContainer = () => {
     dispatch(setChats(newChats))
     dispatch(setActiveChat(chat))
 
-    const messageEvent = `${MESSAGE_RECEIVED}-${chat.id}`
-    const typingEvent = `${TYPING}-${chat.id}`
+    const messageEvent = `${MESSAGE_RECEIVED}-${chat._id}`
+    const typingEvent = `${TYPING}-${chat._id}`
 
     // receive message event from messageEvent namespace
-    socket.on(messageEvent, receiveMessage(chat.id))
+    socket.on(messageEvent, receiveMessage(chat._id))
 
     // receive typing event from typingEvent namespace
-    socket.on(typingEvent, receiveTyping(chat.id))
+    socket.on(typingEvent, receiveTyping(chat._id))
 
   }
 
@@ -85,7 +85,7 @@ const ChatContainer = () => {
     return (message) => {
       var newChats = store.getState().chatReducer.chats.map((chat) => {
         // only append messages array of an active chat
-        if (chat.id === chatId) {
+        if (chat._id === chatId) {
           chat.messages.push(message)
         }
         return chat
@@ -100,7 +100,7 @@ const ChatContainer = () => {
     
       if (sender !== user.name) {
         var newChats = store.getState().chatReducer.chats.map((chat) => {
-          if (chat.id === chatId) {
+          if (chat._id === chatId) {
             // typingUser = [] (initiate)
 
             // Scenasrio 1: user is typing
@@ -134,9 +134,9 @@ const ChatContainer = () => {
 
   var addUserToChat = ({ chatId, newUser }) => {
     const newChats = store.getState().chatReducer.chats.map(chat => {
-      if (chat.id === chatId) {
+      if (chat._id === chatId) {
         // Object.assign({}, store.getState().chatReducer.activeChat, { name: store.getState().chatReducer.activeChat.users.concat(newUser).join(", "), users: store.getState().chatReducer.activeChat.users.concat(newUser) })
-        if(chat.id === store.getState().chatReducer.activeChat.id){
+        if(chat._id === store.getState().chatReducer.activeChat._id){
           dispatch(setActiveChat(Object.assign({}, chat, { name: chat.users.concat(newUser).join(", "), users: chat.users.concat(newUser) })))
 
         }
