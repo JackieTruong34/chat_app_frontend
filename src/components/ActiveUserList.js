@@ -74,7 +74,7 @@ const ActiveUserList = () => {
           {/*filter all users that is not current user  */}
           {userList.filter(otherUser => otherUser.name !== user.name).map((user) => {
             return (
-              <ActiveUser key={user.id} user={user} handleOnClick={handleOnClick} />
+              <ActiveUser key={user._id} user={user} handleOnClick={handleOnClick} />
             )
           })}
 

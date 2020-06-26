@@ -133,17 +133,19 @@ const ChatContainer = () => {
   }
 
   var addUserToChat = ({ chatId, newUser }) => {
+    console.log('newUser: ', newUser.map(user => {return user.name}))
     const newChats = store.getState().chatReducer.chats.map(chat => {
       if (chat._id === chatId) {
         // Object.assign({}, store.getState().chatReducer.activeChat, { name: store.getState().chatReducer.activeChat.users.concat(newUser).join(", "), users: store.getState().chatReducer.activeChat.users.concat(newUser) })
         if(chat._id === store.getState().chatReducer.activeChat._id){
-          dispatch(setActiveChat(Object.assign({}, chat, { name: chat.users.concat(newUser).join(", "), users: chat.users.concat(newUser) })))
+          dispatch(setActiveChat(Object.assign({}, chat, { name: chat.name.concat(newUser.map(user => {return `, ${user.name}`})), users: chat.users.concat(newUser.map(user => {return user._id})) })))
 
         }
-        return Object.assign({}, chat, { name: chat.users.concat(newUser).join(", "), users: chat.users.concat(newUser) })
+        return Object.assign({}, chat, { name: chat.name.concat(newUser.map(user => {return `, ${user.name}`})), users: chat.users.concat(newUser.map(user => {return user._id})) })
       }
       return chat
     })
+    console.log('newChats: ', newChats)
     dispatch(setChats(newChats))
 
 

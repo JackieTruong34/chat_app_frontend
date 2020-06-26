@@ -50,6 +50,7 @@ const AddIconModal = () => {
 
   console.log('user list: ', userList)
   const addUserToChat = (receivers) => {
+    console.log('receivers: ', receivers)
     if (receivers) {
       socket.emit(ADD_USER_TO_CHAT, { receivers, activeChat, chats: store.getState().chatReducer.chats })
 
@@ -94,12 +95,14 @@ const AddIconModal = () => {
           <div className={classes.paper}>
             <div className="modal-header" style={{ borderBottom: '1px solid lightgrey', textAlign: 'center', padding: '7px 5px' }}>
               <Grid container>
+                {/* cancle button */}
                 <Grid item xs={2}>
                   <Button onClick={() => { handleClose(); setReceivers([]); }} color="secondary" size="small" >Cancel</Button>
                 </Grid>
                 <Grid item xs style={{ margin: 'auto', height: 'fit-content' }}>
                   <div>Add More People</div>
                 </Grid>
+                {/* done button */}
                 <Grid item xs={2}>
                   <Button onClick={() => { addUserToChat(receivers); handleClose(); setReceivers([]); }} color="primary" size="small" >Done</Button>
                 </Grid>
@@ -113,7 +116,7 @@ const AddIconModal = () => {
               ):(
                 receivers.map(receiver=>{
                   return(
-                    <div className="receiver" style={{backgroundColor: 'lightblue', borderRadius: '2px', height: 'fit-content', width: 'fit-content', margin: '7px 5px', padding: '7px 5px'}}>{receiver}</div>
+                    <div key={receiver._id} className="receiver" style={{backgroundColor: 'lightblue', borderRadius: '2px', height: 'fit-content', width: 'fit-content', margin: '7px 5px', padding: '7px 5px'}}>{receiver.name}</div>
                
                   )
                 })

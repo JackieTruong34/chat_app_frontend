@@ -226,7 +226,7 @@ const SidebarHeader = (props) => {
                     {userList.length !== 0 ? (
                       userList.filter(activeUser => activeUser.name !== user.name).map((user) => {
                         return (
-                          <ListItem key={user.id} button onClick={() => handleChooseReceivers(user.name)}>
+                          <ListItem key={user._id} button onClick={() => handleChooseReceivers(user.name)}>
                             <ListItemIcon>
                               <IconButton>{user.name[0].toUpperCase()}</IconButton>
                             </ListItemIcon>
