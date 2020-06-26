@@ -48,7 +48,6 @@ const AddIconModal = () => {
   const [open, setOpen] = React.useState(false)
   const [receivers, setReceivers] = React.useState([])
 
-  console.log('user list: ', userList)
   const addUserToChat = (receivers) => {
     console.log('receivers: ', receivers)
     if (receivers) {

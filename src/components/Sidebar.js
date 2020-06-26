@@ -23,7 +23,7 @@ import Button from '@material-ui/core/Button'
 
 // import socket events
 import { PRIVATE_CHAT, LOGOUT } from '../Events'
-import { createChatNameFromUser } from '../Factories'
+// import { createChatNameFromUser } from '../Factories'
 
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { logout, setReceiver } from '../actions/userActions'

@@ -28,19 +28,19 @@ const getTime = (date)=>{
 const createChat = ({messages=[], name= "Community", users=[], isCommunity = false}={})=>({
   _id: mongoose.Types.ObjectId(),
   messages,
-  name: isCommunity? "Community": createChatNameFromUser(users),
+  name: isCommunity? "Community": name,
   users,
   typingUsers: [],
   isCommunity
 })
 
-const createChatNameFromUser = (users, excludeUser = "")=>{
-  return users.filter(u => u !== excludeUser).join(', ') || "Empty users"
-}
+// const createChatNameFromUser = (users, excludeUser = "")=>{
+//   return users.filter(u => u !== excludeUser).join(', ') || "Empty users"
+// }
 
 module.exports ={
   createMessage,
   createChat,
   createUser,
-  createChatNameFromUser
+  // createChatNameFromUser
 }
