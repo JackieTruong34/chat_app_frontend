@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 // import custom components
 import Sidebar from './Sidebar'
 import ActiveUserList from './ActiveUserList'
-import { COMMUNITY_CHAT, MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER } from '../Events'
+import { COMMUNITY_CHAT, MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, ACTIVE_CHAT } from '../Events'
 import ChatHeading from './ChatHeading'
 import Messages from './Messages'
 import MessageInput from './MessageInput'
@@ -11,6 +11,7 @@ import Grid from '@material-ui/core/Grid'
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { setUserList } from '../actions/userActions'
 import { setChats, setActiveChat } from '../actions/chatActions'
+import { SET_ACTIVE_CHAT } from '../actions/actionTypes'
 
 const ChatContainer = () => {
   const socket = useSelector(state => state.socketReducer.socket)
@@ -19,6 +20,8 @@ const ChatContainer = () => {
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const store = useStore()
   const dispatch = useDispatch()
+
+  console.log('active chat: ', activeChat)
 
   // componentDidMount()
   useEffect(() => {
@@ -29,7 +32,10 @@ const ChatContainer = () => {
     // socket.emit(COMMUNITY_CHAT, resetChat)
     // listen on private message namespace
     socket.on(PRIVATE_CHAT, addChat)
+    socket.on(ACTIVE_CHAT, (chat)=>{
+      dispatch(setActiveChat(chat))
 
+    })
     // socket.once('connect', () => {
     //   socket.emit(COMMUNITY_CHAT, resetChat)
     // })
@@ -68,7 +74,7 @@ const ChatContainer = () => {
     console.log('chat: ', chat)
 
     dispatch(setChats(newChats))
-    dispatch(setActiveChat(chat))
+    
 
     const messageEvent = `${MESSAGE_RECEIVED}-${chat._id}`
     const typingEvent = `${TYPING}-${chat._id}`

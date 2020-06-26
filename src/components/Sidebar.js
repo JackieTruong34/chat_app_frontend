@@ -23,13 +23,10 @@ import Button from '@material-ui/core/Button'
 
 // import socket events
 import { PRIVATE_CHAT, LOGOUT } from '../Events'
-// import { createChatNameFromUser } from '../Factories'
 
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { logout, setReceiver } from '../actions/userActions'
 import { setActiveChat } from '../actions/chatActions'
-
-
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -136,7 +133,7 @@ const SidebarHeader = (props) => {
   }
 
   const sendPrivateMessage = (receivers) => {
-    socket.emit(PRIVATE_CHAT, { sender: user.name, receivers, chats })
+    socket.emit(PRIVATE_CHAT, { sender: user, receivers, chats })
 
   }
 
@@ -148,7 +145,6 @@ const SidebarHeader = (props) => {
     console.log('user group: ', receivers)
     sendPrivateMessage(receivers)
     handleCloseModal()
-    setReceiver([])
   }
 
   const handleLogout = ()=>{
@@ -167,8 +163,7 @@ const SidebarHeader = (props) => {
             </IconButton>
           </Tooltip>
 
-
-          {/* <span class="user-name" style={{fontWeight: 'bold', marginRight: '8px', fontSize: '24px', padding: 0, margin: 0}}>{props.user.name}</span> */}
+          {/* menu when clicking to the user account icon */}
           <Menu
             id="fade-menu"
             anchorEl={anchorEl}
@@ -182,8 +177,8 @@ const SidebarHeader = (props) => {
             <MenuItem onClick={handleCloseMenu}>Profile</MenuItem>
             <MenuItem onClick={() => { handleCloseMenu(); handleLogout() }}>Logout</MenuItem>
           </Menu>
-
         </Grid>
+
         <Grid item container xs={4} style={{ float: 'right', padding: '0.6vh' }}>
           <Grid item xs>
             <Tooltip title="Settings" placement="bottom-end">
@@ -191,16 +186,17 @@ const SidebarHeader = (props) => {
                 <SettingsRounded className={classes.icons} />
               </IconButton>
             </Tooltip>
-
           </Grid>
+
           <Grid item xs>
             <Tooltip title="Create new meeting" placement="bottom-end">
               <IconButton size="small" className={classes.buttons}>
                 <Videocam className={classes.icons} />
               </IconButton>
             </Tooltip>
-
           </Grid>
+
+          {/* write new chat icon */}
           <Grid item xs>
             <Tooltip title="Write new messages" placement="bottom-end">
               <IconButton size="small" className={classes.buttons} onClick={handleOpenModal}>
@@ -212,7 +208,7 @@ const SidebarHeader = (props) => {
               aria-describedby="transition-modal-description"
               className={classes.modal}
               open={openModal}
-              onClose={handleCloseModal}
+              onClose={()=>{handleCloseModal(); setReceivers([])}}
               closeAfterTransition
               BackdropComponent={Backdrop}
               BackdropProps={{
@@ -226,7 +222,7 @@ const SidebarHeader = (props) => {
                     {userList.length !== 0 ? (
                       userList.filter(activeUser => activeUser.name !== user.name).map((user) => {
                         return (
-                          <ListItem key={user._id} button onClick={() => handleChooseReceivers(user.name)}>
+                          <ListItem key={user._id} button onClick={() => handleChooseReceivers(user)}>
                             <ListItemIcon>
                               <IconButton>{user.name[0].toUpperCase()}</IconButton>
                             </ListItemIcon>
@@ -235,7 +231,7 @@ const SidebarHeader = (props) => {
                         )
                       })
                     ) : (<div></div>)}
-                    <Button onClick={handleCreateNewChat}>Create Chat</Button>
+                    <Button onClick={()=>{handleCreateNewChat(); setReceivers([])}}>Create Chat</Button>
                   </List>
                 </div>
               </Fade>
