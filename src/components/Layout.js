@@ -4,6 +4,7 @@ import { LOGOUT, VERIFY_USER } from '../Events'
 import LoginForm from './LoginForm'
 import ChatContainer from './ChatContainer'
 import SignupForm from './SignupForm'
+import LoginSignupTabs from './LoginSignupTabs'
 
 // import dispatch, selector
 import { useDispatch, useSelector, useStore } from 'react-redux'
@@ -41,7 +42,6 @@ const Layout = (props) => {
         dispatch(setUser(user))
       }
     })
-
   }
 
   var setLogoutFunc = () => {
@@ -53,8 +53,7 @@ const Layout = (props) => {
     <div className="contaienr">
       {JSON.stringify(user) === '{}' ? (
         <div>
-          <LoginForm />
-          <SignupForm />
+          <LoginSignupTabs/>
         </div>
 
       ) : <ChatContainer />}
