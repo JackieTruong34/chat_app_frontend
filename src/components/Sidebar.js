@@ -98,6 +98,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
   },
+
 }))
 
 const SidebarHeader = (props) => {
@@ -147,7 +148,7 @@ const SidebarHeader = (props) => {
     handleCloseModal()
   }
 
-  const handleLogout = ()=>{
+  const handleLogout = () => {
     dispatch(logout())
     socket.emit(LOGOUT)
   }
@@ -208,7 +209,7 @@ const SidebarHeader = (props) => {
               aria-describedby="transition-modal-description"
               className={classes.modal}
               open={openModal}
-              onClose={()=>{handleCloseModal(); setReceivers([])}}
+              onClose={() => { handleCloseModal(); setReceivers([]) }}
               closeAfterTransition
               BackdropComponent={Backdrop}
               BackdropProps={{
@@ -231,7 +232,7 @@ const SidebarHeader = (props) => {
                         )
                       })
                     ) : (<div></div>)}
-                    <Button onClick={()=>{handleCreateNewChat(); setReceivers([])}}>Create Chat</Button>
+                    <Button onClick={() => { handleCreateNewChat(); setReceivers([]) }}>Create Chat</Button>
                   </List>
                 </div>
               </Fade>
@@ -287,41 +288,42 @@ const ChatList = () => {
   const chats = useSelector(state => state.chatReducer.chats)
   const user = useSelector(state => state.userReducer.user)
   const activeChat = useSelector(state => state.chatReducer.activeChat)
-  
+
   return (
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat) => {
         if (chat.name) {
           const lastMessage = chat.messages[chat.messages.length - 1];
-          // const chatSideName = chat.users.find((name) => {
-          //     return name !== props.user.name
-          // }) || "Community"
-          // const classNames = (activeChat && activeChat.id === chat.id) ? 'active' : ''
-          const name = chat.name
+
           return (
             <div
               className={classes.chats}
               style={{ height: 48, margin: '1vh 0.8vw', }}
               key={chat._id}
-              onClick={() => { dispatch(setActiveChat(chat)); console.log('active chat: ', activeChat) }}
-
+              onClick={() => { dispatch(setActiveChat(chat)); chat.hasNewMessages = false; console.log('active chat: ', activeChat) }}
             >
               <Grid container>
                 <Grid item xs sm={2}>
                   <IconButton size="medium" >
-                    {name[0].toUpperCase()}
+                    {chat.name[0].toUpperCase()}
                   </IconButton>
                 </Grid>
                 <Grid item xs style={{ padding: '0.8vh 0' }}>
-                  <div className="chat-name" style={{ fontWeight: 'bold' }}>{name}</div>
-                  <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '15vw' }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
+                  <div className={`chat-name`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
+                  <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small'}}>
+                    <Grid item xs >
+                      <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
+
+                    </Grid>
+                    <Grid item xs={3}>
+                      <div className="chat-time" style={{textAlign: 'right'}}>{lastMessage ? lastMessage.time : null}</div>
+
+                    </Grid>
+                  </Grid>
                 </Grid>
-                <Grid item xs sm={2}>
-                  <div className="chat-time">{lastMessage ? lastMessage.time : null}</div>
-                </Grid>
+
               </Grid>
             </div>
-
           )
         }
         return null

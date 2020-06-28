@@ -63,10 +63,10 @@ const MessageList = () => {
         activeChat.messages.length !== 0 ? (
           activeChat.messages.map((mes) => {
             return (
-              <div key={mes._id} className={`message-container ${mes.sender === user.name && "right"}`}>
-                <div className={`icon ${mes.sender === user.name? `${classes.hidden}`:`${classes.show}`}`}>
+              <div key={mes._id} className={`message-container ${mes.sender.name === user.name && "right"}`}>
+                <div className={`icon ${mes.sender.name === user.name? `${classes.hidden}`:`${classes.show}`}`}>
                   <IconButton size="small" style={{width: 40, height: 40, borderRadius: '50%'}}>
-                    {mes.sender[0].toUpperCase()}
+                    {mes.sender.name[0].toUpperCase()}
                   </IconButton>
                 </div>
                 <div className={`message ${classes.message}`}>
