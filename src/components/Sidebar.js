@@ -20,6 +20,7 @@ import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import Button from '@material-ui/core/Button'
+import {getTime} from '../Factories'
 
 // import socket events
 import { PRIVATE_CHAT, LOGOUT } from '../Events'
@@ -294,7 +295,7 @@ const ChatList = () => {
       {chats.map((chat) => {
         if (chat.name) {
           const lastMessage = chat.messages[chat.messages.length - 1];
-
+          console.log('time: ', typeof lastMessage.time)
           return (
             <div
               className={classes.chats}
@@ -316,7 +317,7 @@ const ChatList = () => {
 
                     </Grid>
                     <Grid item xs={3}>
-                      <div className="chat-time" style={{textAlign: 'right'}}>{lastMessage ? lastMessage.time : null}</div>
+                      <div className="chat-time" style={{textAlign: 'right'}}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>
 
                     </Grid>
                   </Grid>

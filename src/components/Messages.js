@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { useSelector, useStore } from 'react-redux'
 import IconButton from '@material-ui/core/IconButton'
+import {getTime} from '../Factories'
 
 const useStyles = makeStyles(() => ({
   message: {
@@ -72,7 +73,7 @@ const MessageList = () => {
                 <div className={`message ${classes.message}`}>
                   <p>{mes.message}</p>
                 </div>
-                <div className={classes.time}><p style={{fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0'}}>{mes.time}</p></div>
+                <div className={classes.time}><p style={{fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0'}}>{getTime(new Date(mes.time))}</p></div>
               </div>
             )
 
