@@ -70,6 +70,7 @@ const ChatContainer = () => {
   }
 
   var addChat = (chat, reset = false) => {
+    console.log('chat; ', chat)
     const newChats = reset ? [chat] : [...store.getState().chatReducer.chats, chat]
 
     dispatch(setChats(newChats))
