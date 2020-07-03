@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 // import custom components
 import Sidebar from './Sidebar'
 import ActiveUserList from './ActiveUserList'
-import { COMMUNITY_CHAT, MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, ACTIVE_CHAT } from '../Events'
+import { MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, ACTIVE_CHAT, DELETE_CHAT } from '../Events'
 import ChatHeading from './ChatHeading'
 import Messages from './Messages'
 import MessageInput from './MessageInput'
@@ -21,7 +21,7 @@ const ChatContainer = () => {
   const store = useStore()
   const dispatch = useDispatch()
 
-  console.log('active chat: ', activeChat)
+  console.log('chats: ', chats)
 
   // componentDidMount()
   useEffect(() => {
@@ -32,13 +32,8 @@ const ChatContainer = () => {
     // socket.emit(COMMUNITY_CHAT, resetChat)
     // listen on private message namespace
     socket.on(PRIVATE_CHAT, addChat)
-    // socket.on(ACTIVE_CHAT, (chat)=>{
-    //   dispatch(setActiveChat(chat))
 
-    // })
-    // socket.once('connect', () => {
-    //   socket.emit(COMMUNITY_CHAT, resetChat)
-    // })
+    socket.on(DELETE_CHAT, deleteChat)
 
     // listen on event when user is connected
     socket.on(USER_CONNECTED, (connectedUsers) => {
@@ -69,8 +64,14 @@ const ChatContainer = () => {
     return addChat(chat, true)
   }
 
+  var deleteChat = (chat)=>{
+    const newChats = store.getState().chatReducer.chats.filter(object => object._id !== chat._id)
+    dispatch(setChats(newChats))
+    dispatch(setActiveChat(null))
+    
+  }
+
   var addChat = (chat, reset = false) => {
-    console.log('chat; ', chat)
     const newChats = reset ? [chat] : [...store.getState().chatReducer.chats, chat]
 
     dispatch(setChats(newChats))

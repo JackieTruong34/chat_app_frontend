@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { useSelector, useStore } from 'react-redux'
 import IconButton from '@material-ui/core/IconButton'
@@ -58,13 +58,16 @@ const MessageList = () => {
     return 'rgb(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
   }
 
+ 
+
   return (
     <div>
       {
         activeChat.messages.length !== 0 ? (
-          activeChat.messages.map((mes) => {
+          activeChat.messages.map((mes, index) => {
             return (
-              <div key={mes._id} className={`message-container ${mes.sender.name === user.name && "right"}`}>
+              <div key={index} className={`message-container ${mes.sender.name === user.name && "right"}`} >
+                
                 <div className={`icon ${mes.sender.name === user.name? `${classes.hidden}`:`${classes.show}`}`}>
                   <IconButton size="small" style={{width: 40, height: 40, borderRadius: '50%'}}>
                     {mes.sender.name[0].toUpperCase()}
@@ -74,6 +77,7 @@ const MessageList = () => {
                   <p>{mes.message}</p>
                 </div>
                 <div className={classes.time}><p style={{fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0'}}>{getTime(new Date(mes.time))}</p></div>
+                
               </div>
             )
 

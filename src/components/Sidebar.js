@@ -6,7 +6,7 @@ import SettingsRounded from '@material-ui/icons/SettingsRounded'
 import SearchIcon from '@material-ui/icons/Search'
 import Videocam from '@material-ui/icons/Videocam'
 import AddCommentIcon from '@material-ui/icons/AddComment'
-
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz'
 import Input from '@material-ui/core/Input'
 import IconButton from '@material-ui/core/IconButton'
 import Menu from '@material-ui/core/Menu'
@@ -20,10 +20,10 @@ import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import Button from '@material-ui/core/Button'
-import {getTime} from '../Factories'
+import { getTime } from '../Factories'
 
 // import socket events
-import { PRIVATE_CHAT, LOGOUT } from '../Events'
+import { PRIVATE_CHAT, LOGOUT, DELETE_CHAT } from '../Events'
 
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { logout, setReceiver } from '../actions/userActions'
@@ -285,14 +285,43 @@ const SidebarSearch = (props) => {
 
 const ChatList = () => {
   const classes = useStyles()
+
   const dispatch = useDispatch()
   const chats = useSelector(state => state.chatReducer.chats)
   const user = useSelector(state => state.userReducer.user)
   const activeChat = useSelector(state => state.chatReducer.activeChat)
+  const socket = useSelector(state => state.socketReducer.socket)
 
+  const [isHovered, setIsHovered] = useState({}) // set hover by index of a div
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleMouseEnter = (index) => {
+    setIsHovered((prevState) => ({
+      ...prevState, [index]: true
+    }))
+  }
+
+  const handleMouseLeave = (index) => {
+    setIsHovered((prevState) => ({
+      ...prevState, [index]: false
+    }))
+  }
+
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDeleteChat = ()=>{
+    socket.emit(DELETE_CHAT, {chatId: activeChat._id})
+  }
   return (
     <div className="active-chat" style={{ marginTop: '2vh' }}>
-      {chats.map((chat) => {
+      {chats.map((chat, index) => {
         if (chat.name) {
           const lastMessage = chat.messages[chat.messages.length - 1];
           return (
@@ -301,6 +330,8 @@ const ChatList = () => {
               style={{ height: 48, margin: '1vh 0.8vw', }}
               key={chat._id}
               onClick={() => { dispatch(setActiveChat(chat)); chat.hasNewMessages = false; console.log('active chat: ', activeChat) }}
+              onMouseEnter={() => { handleMouseEnter(index) }}
+              onMouseLeave={() => { handleMouseLeave(index) }}
             >
               <Grid container>
                 <Grid item xs sm={2}>
@@ -310,17 +341,29 @@ const ChatList = () => {
                 </Grid>
                 <Grid item xs style={{ padding: '0.8vh 0' }}>
                   <div className={`chat-name`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
-                  <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small'}}>
+                  <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small' }}>
                     <Grid item xs >
                       <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
 
                     </Grid>
                     <Grid item xs={3}>
-                      <div className="chat-time" style={{textAlign: 'right'}}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>
+                      <div className="chat-time" style={{ textAlign: 'right' }}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>
 
                     </Grid>
                   </Grid>
                 </Grid>
+                <Grid item xs={1} style={{ display: 'inherit' }}>
+                  <IconButton size="small" style={{ margin: 'auto' }} onClick={(event) => {handleOpenMenu(event)}}>
+                    <MoreHorizIcon />
+                  </IconButton>
+                  <Menu id="option-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                    <MenuItem onClick={handleCloseMenu}>Leave Group</MenuItem>
+                    <MenuItem onClick={handleCloseMenu}>Change Chat Name</MenuItem>
+                    <MenuItem onClick={()=>{handleCloseMenu(); handleDeleteChat()}}>Delete</MenuItem>
+                  </Menu>
+
+                </Grid>
+                {/* {isHovered[index] && } */}
 
               </Grid>
             </div>
