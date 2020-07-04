@@ -12,9 +12,11 @@ import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import Button from '@material-ui/core/Button'
+import Input from '@material-ui/core/Input'
+
 
 import { useSelector, useStore } from 'react-redux'
-import { ADD_USER_TO_CHAT } from '../Events'
+import { ADD_USER_TO_CHAT, CHANGE_CHAT_NAME } from '../Events'
 
 const useStyles = makeStyles((theme) => ({
   buttons: {
@@ -66,15 +68,15 @@ const AddIconModal = () => {
   }
 
   const handleChooseReceivers = (receiver) => {
-    if(!receivers.includes(receiver)){
+    if (!receivers.includes(receiver)) {
       setReceivers(receivers => [...receivers, receiver])
 
     }
   }
 
   return (
-    <div>
-      <IconButton size="medium" className={classes.buttons} onClick={handleClick}>
+    <div className="icon-modal-container">
+      <IconButton size="medium" style={{ padding: 5 }} className={classes.buttons} onClick={handleClick}>
         <PersonAddIcon />
       </IconButton>
 
@@ -83,7 +85,7 @@ const AddIconModal = () => {
         aria-describedby="transition-modal-description"
         className={classes.modal}
         open={open}
-        onClose={()=>{handleClose(); setReceivers([])}}
+        onClose={() => { handleClose(); setReceivers([]) }}
         closeAfterTransition
         BackdropComponent={Backdrop}
         BackdropProps={{
@@ -109,17 +111,17 @@ const AddIconModal = () => {
 
             </div>
 
-            <div className="chosen-receivers" style={{ minHeight: 40, width: '100%', borderBottom: '1px solid lightgrey', display: 'flex', flexWrap: 'wrap'}}>
-              {receivers.length ===0 ?(
-                <div className="title" style={{margin: 'auto 0', height: 'fit-content'}}>Add to group:</div>
-              ):(
-                receivers.map(receiver=>{
-                  return(
-                    <div key={receiver._id} className="receiver" style={{backgroundColor: 'lightblue', borderRadius: '2px', height: 'fit-content', width: 'fit-content', margin: '7px 5px', padding: '7px 5px'}}>{receiver.name}</div>
-               
-                  )
-                })
-              )}
+            <div className="chosen-receivers" style={{ minHeight: 40, width: '100%', borderBottom: '1px solid lightgrey', display: 'flex', flexWrap: 'wrap' }}>
+              {receivers.length === 0 ? (
+                <div className="title" style={{ margin: 'auto 0', height: 'fit-content' }}>Add to group:</div>
+              ) : (
+                  receivers.map(receiver => {
+                    return (
+                      <div key={receiver._id} className="receiver" style={{ backgroundColor: 'lightblue', borderRadius: '2px', height: 'fit-content', width: 'fit-content', margin: '7px 5px', padding: '7px 5px' }}>{receiver.name}</div>
+
+                    )
+                  })
+                )}
 
             </div>
 
@@ -152,13 +154,32 @@ const ChatHeading = () => {
   const classes = useStyles()
   const store = useStore()
   const activeChat = useSelector(state => state.chatReducer.activeChat)
+  const socket = useSelector(state => state.socketReducer.socket)
+  const [chatName, setChatName] = React.useState("")
+  const handleChange = (e) => {
+    setChatName(e.target.value)
+  }
 
+  const handleChangeChatName = (e) => {
+    e.preventDefault()
+    socket.emit(CHANGE_CHAT_NAME, {activeChat: activeChat, newChatName: chatName})
+    setChatName("")
+  }
   return (
     <div className="heading-container" style={{ height: 52, borderBottom: '1px solid lightgrey' }}>
-      <div className="container" style={{ padding: '1vh 1vw', height: '100%' }}>
-        <Grid container style={{ height: 'fit-content' }}>
-          <Grid item xs><h2 style={{ margin: 0, padding: 0 }}>{store.getState().chatReducer.activeChat.name}</h2></Grid>
-          <Grid item xs={2}>
+      <div className="container" style={{ padding: '1vh 1vw' }}>
+        <Grid container >
+          <Grid item xs >
+            <form type="text" onSubmit={handleChangeChatName} style={{display: 'flex'}}>
+              {/* <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}></div> */}
+
+              <Input style={{width: '200px'}} defaultValue={store.getState().chatReducer.activeChat.name} disableUnderline={true} onChange={handleChange} inputProps={{ style: {fontWeight: 'bold', fontSize: '18.72px' } }} />
+              {chatName? (<Button type="submit">Change</Button>):null}
+              
+            </form>
+          </Grid>
+          {/* <Grid item xs><h2 style={{ margin: 0, padding: 0 }}>{store.getState().chatReducer.activeChat.name}</h2></Grid> */}
+          <Grid item xs={1}>
             {activeChat.name !== "Community" ? (<AddIconModal />) : (<div></div>)}
           </Grid>
         </Grid>

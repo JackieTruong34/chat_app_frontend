@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { makeStyles, fade } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 // icons
@@ -285,7 +285,7 @@ const SidebarSearch = (props) => {
 
 const ChatList = () => {
   const classes = useStyles()
-
+  const store = useStore()
   const dispatch = useDispatch()
   const chats = useSelector(state => state.chatReducer.chats)
   const user = useSelector(state => state.userReducer.user)
@@ -294,6 +294,7 @@ const ChatList = () => {
 
   const [isHovered, setIsHovered] = useState({}) // set hover by index of a div
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [isMenuOpened, setIsMenuOpened] = useState({})
 
   const handleMouseEnter = (index) => {
     setIsHovered((prevState) => ({
@@ -307,18 +308,23 @@ const ChatList = () => {
     }))
   }
 
-
-  const handleOpenMenu = (event) => {
+  const handleOpenMenu = (event, index) => {
     setAnchorEl(event.currentTarget);
+    setIsMenuOpened((prevState) => ({
+      ...prevState, [index]: true
+    }))
   };
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
+    setIsMenuOpened({})
+
   };
 
-  const handleDeleteChat = ()=>{
-    socket.emit(DELETE_CHAT, {chatId: activeChat._id})
+  const handleDeleteChat = () => {
+    socket.emit(DELETE_CHAT, { chatId: activeChat._id })
   }
+
   return (
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat, index) => {
@@ -339,31 +345,32 @@ const ChatList = () => {
                     {chat.name[0].toUpperCase()}
                   </IconButton>
                 </Grid>
+
                 <Grid item xs style={{ padding: '0.8vh 0' }}>
                   <div className={`chat-name`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
                   <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small' }}>
                     <Grid item xs >
                       <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
-
                     </Grid>
                     <Grid item xs={3}>
                       <div className="chat-time" style={{ textAlign: 'right' }}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>
-
                     </Grid>
                   </Grid>
                 </Grid>
-                <Grid item xs={1} style={{ display: 'inherit' }}>
-                  <IconButton size="small" style={{ margin: 'auto' }} onClick={(event) => {handleOpenMenu(event)}}>
-                    <MoreHorizIcon />
-                  </IconButton>
-                  <Menu id="option-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                    <MenuItem onClick={handleCloseMenu}>Leave Group</MenuItem>
-                    <MenuItem onClick={handleCloseMenu}>Change Chat Name</MenuItem>
-                    <MenuItem onClick={()=>{handleCloseMenu(); handleDeleteChat()}}>Delete</MenuItem>
-                  </Menu>
 
-                </Grid>
-                {/* {isHovered[index] && } */}
+                {isHovered[index] &&
+                  <Grid item xs={1} style={{ display: 'inherit' }}>
+                    <IconButton size="small" style={{ margin: 'auto' }} onClick={(event) => { handleOpenMenu(event, index) }}>
+                      <MoreHorizIcon />
+                    </IconButton>
+                    <Menu id="option-menu" anchorEl={anchorEl} keepMounted open={isMenuOpened[index] ? (isMenuOpened[index]) : (false)} onClose={() => handleCloseMenu(index)}>
+                      {chat.users.length > 2 ? (<MenuItem onClick={() => { handleCloseMenu(index) }}>Leave Group</MenuItem>) : null}
+
+                      <MenuItem onClick={() => { handleCloseMenu(index); handleDeleteChat() }}>Delete</MenuItem>
+                    </Menu>
+
+                  </Grid>
+                }
 
               </Grid>
             </div>
