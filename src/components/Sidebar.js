@@ -21,6 +21,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import Button from '@material-ui/core/Button'
 import { getTime } from '../Factories'
+import Avatar from '@material-ui/core/Avatar'
 
 // import socket events
 import { PRIVATE_CHAT, LOGOUT, DELETE_CHAT } from '../Events'
@@ -340,10 +341,9 @@ const ChatList = () => {
               onMouseLeave={() => { handleMouseLeave(index) }}
             >
               <Grid container>
-                <Grid item xs sm={2}>
-                  <IconButton size="medium" >
-                    {chat.name[0].toUpperCase()}
-                  </IconButton>
+                <Grid item xs={2} >
+                  <Avatar style={{width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', margin: 5}}>{chat.name[0].toUpperCase()}</Avatar>
+                  
                 </Grid>
 
                 <Grid item xs style={{ padding: '0.8vh 0' }}>

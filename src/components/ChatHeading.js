@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 import IconButton from '@material-ui/core/IconButton'
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import InfoIcon from '@material-ui/icons/Info'
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
@@ -13,14 +14,15 @@ import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import Button from '@material-ui/core/Button'
 import Input from '@material-ui/core/Input'
-
+import ActiveChatDetail from './ActiveChatDetail'
 
 import { useSelector, useStore } from 'react-redux'
-import { ADD_USER_TO_CHAT, CHANGE_CHAT_NAME } from '../Events'
+import { ADD_USER_TO_CHAT, CHANGE_CHAT_NAME, USERS_IN_CHAT } from '../Events'
 
 const useStyles = makeStyles((theme) => ({
-  buttons: {
-    backgroundColor: 'rgba(0, 0, 0, .04)'
+  iconBtn: {
+    padding: 5,
+    backgroundColor: 'white'
   },
   modal: {
     display: 'flex',
@@ -37,7 +39,11 @@ const useStyles = makeStyles((theme) => ({
   list: {
     height: '120px',
     overflowY: 'scroll'
+  },
+  iconModalContainer: {
+    width: 'fit-content'
   }
+
 }))
 
 const AddIconModal = () => {
@@ -75,8 +81,8 @@ const AddIconModal = () => {
   }
 
   return (
-    <div className="icon-modal-container">
-      <IconButton size="medium" style={{ padding: 5 }} className={classes.buttons} onClick={handleClick}>
+    <div className={classes.iconModalContainer}>
+      <IconButton size="medium" className={classes.iconBtn} onClick={handleClick}>
         <PersonAddIcon />
       </IconButton>
 
@@ -150,6 +156,44 @@ const AddIconModal = () => {
   )
 }
 
+const InfoIconModal = () => {
+  const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
+  const socket = useSelector(state => state.socketReducer.socket)
+  const activeChat = useSelector(state => state.chatReducer.activeChat)
+  const handleOpen = () => {
+    setOpen(true);
+    socket.emit(USERS_IN_CHAT, {chat: activeChat})
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  return (
+    <div className={classes.iconModalContainer}>
+      <IconButton size="medium" className={classes.iconBtn} onClick={handleOpen}>
+        <InfoIcon />
+      </IconButton>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={classes.modal}
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={open}>
+          <ActiveChatDetail/>
+        </Fade>
+      </Modal>
+    </div>
+  )
+}
+
 const ChatHeading = () => {
   const classes = useStyles()
   const store = useStore()
@@ -162,7 +206,7 @@ const ChatHeading = () => {
 
   const handleChangeChatName = (e) => {
     e.preventDefault()
-    socket.emit(CHANGE_CHAT_NAME, {activeChat: activeChat, newChatName: chatName})
+    socket.emit(CHANGE_CHAT_NAME, { activeChat: activeChat, newChatName: chatName })
     setChatName("")
   }
   return (
@@ -170,17 +214,22 @@ const ChatHeading = () => {
       <div className="container" style={{ padding: '1vh 1vw' }}>
         <Grid container >
           <Grid item xs >
-            <form type="text" onSubmit={handleChangeChatName} style={{display: 'flex'}}>
+            <form type="text" onSubmit={handleChangeChatName} style={{ display: 'flex' }}>
               {/* <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}></div> */}
 
-              <Input style={{width: '200px'}} defaultValue={store.getState().chatReducer.activeChat.name} disableUnderline={true} onChange={handleChange} inputProps={{ style: {fontWeight: 'bold', fontSize: '18.72px' } }} />
-              {chatName? (<Button type="submit">Change</Button>):null}
-              
+              <Input style={{ width: '200px' }} defaultValue={store.getState().chatReducer.activeChat.name} disableUnderline={true} onChange={handleChange} inputProps={{ style: { fontWeight: 'bold', fontSize: '18.72px' } }} />
+              {chatName ? (<Button type="submit">Change</Button>) : null}
+
             </form>
           </Grid>
           {/* <Grid item xs><h2 style={{ margin: 0, padding: 0 }}>{store.getState().chatReducer.activeChat.name}</h2></Grid> */}
           <Grid item xs={1}>
-            {activeChat.name !== "Community" ? (<AddIconModal />) : (<div></div>)}
+            {activeChat.name !== "Community" ? (
+              <div className="icon-modals-container" style={{ display: 'flex' }}>
+                <AddIconModal />
+                <InfoIconModal />
+              </div>
+            ) : null}
           </Grid>
         </Grid>
 
