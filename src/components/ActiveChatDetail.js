@@ -31,7 +31,6 @@ const ActiveChatDetail = () => {
     }
   }, [])
   
-  console.log('user in chat array: ', usersInChat)
 
   return (
     <div className={classes.root}>

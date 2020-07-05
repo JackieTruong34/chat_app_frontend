@@ -21,8 +21,6 @@ const ChatContainer = () => {
   const store = useStore()
   const dispatch = useDispatch()
 
-  console.log('chats: ', chats)
-
   // componentDidMount()
   useEffect(() => {
     initSocket(socket)

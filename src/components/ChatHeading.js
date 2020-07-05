@@ -56,6 +56,9 @@ const AddIconModal = () => {
   const [open, setOpen] = React.useState(false)
   const [receivers, setReceivers] = React.useState([])
 
+  const receiversRef = React.useRef()
+  receiversRef.current = receivers
+
   const addUserToChat = (receivers) => {
     console.log('receivers: ', receivers)
     if (receivers) {
@@ -76,7 +79,10 @@ const AddIconModal = () => {
   const handleChooseReceivers = (receiver) => {
     if (!receivers.includes(receiver)) {
       setReceivers(receivers => [...receivers, receiver])
-
+    } else {
+      const newReceiversArr = receiversRef.current.filter(item=>item !== receiver)
+      console.log(newReceiversArr)
+      setReceivers(newReceiversArr)
     }
   }
 
@@ -121,7 +127,7 @@ const AddIconModal = () => {
               {receivers.length === 0 ? (
                 <div className="title" style={{ margin: 'auto 0', height: 'fit-content' }}>Add to group:</div>
               ) : (
-                  receivers.map(receiver => {
+                  receiversRef.current.map(receiver => {
                     return (
                       <div key={receiver._id} className="receiver" style={{ backgroundColor: 'lightblue', borderRadius: '2px', height: 'fit-content', width: 'fit-content', margin: '7px 5px', padding: '7px 5px' }}>{receiver.name}</div>
 
@@ -163,7 +169,7 @@ const InfoIconModal = () => {
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const handleOpen = () => {
     setOpen(true);
-    socket.emit(USERS_IN_CHAT, {chat: activeChat})
+    socket.emit(USERS_IN_CHAT, { chat: activeChat })
   };
 
   const handleClose = () => {
@@ -187,7 +193,7 @@ const InfoIconModal = () => {
         }}
       >
         <Fade in={open}>
-          <ActiveChatDetail/>
+          <ActiveChatDetail />
         </Fade>
       </Modal>
     </div>
