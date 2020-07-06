@@ -9,8 +9,9 @@ import { CHANGE_CHAT_NAME, USERS_IN_CHAT } from '../Events'
 const useStyles = makeStyles(() => ({
   root: {
     backgroundColor: 'white',
+    borderRadius: '4px',
     padding: '10px',
-    minWidth: '25vw',
+    width: '400px',
     minHeight: '25vh'
   }
 }))

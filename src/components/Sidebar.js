@@ -100,6 +100,12 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
   },
+  chatName: {
+    textOverflow: 'ellipsis', 
+    overflow: 'hidden', 
+    whiteSpace: 'nowrap', 
+    maxWidth: '12vw',
+  }
 
 }))
 
@@ -182,7 +188,7 @@ const SidebarHeader = (props) => {
           </Menu>
         </Grid>
 
-        <Grid item container xs={4} style={{ float: 'right', padding: '0.6vh' }}>
+        <Grid item container xs={8} lg={6} xl={4} style={{ float: 'right', padding: '0.6vh', justifyContent: 'flex-end' }}>
           <Grid item xs>
             <Tooltip title="Settings" placement="bottom-end">
               <IconButton size="small" className={classes.buttons}>
@@ -341,37 +347,37 @@ const ChatList = () => {
               onMouseLeave={() => { handleMouseLeave(index) }}
             >
               <Grid container>
-                <Grid item xs={2} >
-                  <Avatar style={{width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', margin: 5}}>{chat.name[0].toUpperCase()}</Avatar>
-                  
+                <Grid item xs={3} lg={2}>
+                  <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', margin: 5 }}>{chat.name[0].toUpperCase()}</Avatar>
+
                 </Grid>
 
                 <Grid item xs style={{ padding: '0.8vh 0' }}>
-                  <div className={`chat-name`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
+                  <div className={`chat-name ${classes.chatName}`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
                   <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small' }}>
-                    <Grid item xs >
+                    <Grid item xs={10} lg >
                       <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
                       <div className="chat-time" style={{ textAlign: 'right' }}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>
                     </Grid>
                   </Grid>
                 </Grid>
+                <Grid item xs={2} lg={1} style={{ display: 'inherit', justifyContent: 'flex-end' }}>
+                  {isHovered[index] &&
+                    <div className="chat-options-button" style={{margin: 'auto'}}>
+                      <IconButton size="small" style={{ margin: 'auto', padding: 0 }} onClick={(event) => { handleOpenMenu(event, index) }}>
+                        <MoreHorizIcon />
+                      </IconButton>
+                      <Menu id="option-menu" anchorEl={anchorEl} keepMounted open={isMenuOpened[index] ? (isMenuOpened[index]) : (false)} onClose={() => handleCloseMenu(index)}>
+                        {chat.users.length > 2 ? (<MenuItem onClick={() => { handleCloseMenu(index) }}>Leave Group</MenuItem>) : null}
 
-                {isHovered[index] &&
-                  <Grid item xs={1} style={{ display: 'inherit' }}>
-                    <IconButton size="small" style={{ margin: 'auto' }} onClick={(event) => { handleOpenMenu(event, index) }}>
-                      <MoreHorizIcon />
-                    </IconButton>
-                    <Menu id="option-menu" anchorEl={anchorEl} keepMounted open={isMenuOpened[index] ? (isMenuOpened[index]) : (false)} onClose={() => handleCloseMenu(index)}>
-                      {chat.users.length > 2 ? (<MenuItem onClick={() => { handleCloseMenu(index) }}>Leave Group</MenuItem>) : null}
+                        <MenuItem onClick={() => { handleCloseMenu(index); handleDeleteChat() }}>Delete</MenuItem>
+                      </Menu>
+                    </div>
 
-                      <MenuItem onClick={() => { handleCloseMenu(index); handleDeleteChat() }}>Delete</MenuItem>
-                    </Menu>
-
-                  </Grid>
-                }
-
+                  }
+                </Grid>
               </Grid>
             </div>
           )

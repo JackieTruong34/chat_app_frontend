@@ -77,6 +77,7 @@ var SignupForm = () => {
           onChange={(e) => { dispatch(setNickname(e.target.value)) }}
           fullWidth={true}
           variant="outlined"
+          autoFocus={true}
         />
         <div className={classes.error} >{error ? error : null}</div>
         <Button type="submit" fullWidth={true} color="primary" variant="contained">Signup</Button>

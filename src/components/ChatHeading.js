@@ -15,6 +15,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Button from '@material-ui/core/Button'
 import Input from '@material-ui/core/Input'
 import ActiveChatDetail from './ActiveChatDetail'
+import Avatar from '@material-ui/core/Avatar'
 
 import { useSelector, useStore } from 'react-redux'
 import { ADD_USER_TO_CHAT, CHANGE_CHAT_NAME, USERS_IN_CHAT } from '../Events'
@@ -30,10 +31,10 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   paper: {
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: theme.shadows[5],
+    backgroundColor: 'white',
     borderRadius: '4px',
-    width: '20vw',
+    padding: '10px',
+    width: '400px',
     minHeight: '25vh'
   },
   list: {
@@ -60,7 +61,6 @@ const AddIconModal = () => {
   receiversRef.current = receivers
 
   const addUserToChat = (receivers) => {
-    console.log('receivers: ', receivers)
     if (receivers) {
       socket.emit(ADD_USER_TO_CHAT, { receivers, activeChat, chats: store.getState().chatReducer.chats })
     }
@@ -88,7 +88,6 @@ const AddIconModal = () => {
       <IconButton size="medium" className={classes.iconBtn} onClick={handleClick}>
         <PersonAddIcon />
       </IconButton>
-
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -110,7 +109,7 @@ const AddIconModal = () => {
                   <Button onClick={() => { handleClose(); setReceivers([]); }} color="secondary" size="small" >Cancel</Button>
                 </Grid>
                 <Grid item xs style={{ margin: 'auto', height: 'fit-content' }}>
-                  <div>Add More People</div>
+                  <div class="add-user-title" style={{fontWeight: 'bold'}}>Add More People</div>
                 </Grid>
                 {/* done button */}
                 <Grid item xs={2}>
@@ -122,7 +121,7 @@ const AddIconModal = () => {
 
             <div className="chosen-receivers" style={{ minHeight: 40, width: '100%', borderBottom: '1px solid lightgrey', display: 'flex', flexWrap: 'wrap' }}>
               {receivers.length === 0 ? (
-                <div className="title" style={{ margin: 'auto 0', height: 'fit-content' }}>Add to group:</div>
+                <div className="title" style={{ margin: 'auto 0', height: 'fit-content', color: 'rgba(0, 0, 0, 0.4)' }}>Add to group:</div>
               ) : (
                   receiversRef.current.map(receiver => {
                     return (
@@ -142,13 +141,11 @@ const AddIconModal = () => {
                       // sendPrivateMessage(activeUser);
                       handleChooseReceivers(activeUser);
                     }}>
-                      <ListItemIcon>
-                        <IconButton>{activeUser.name[0].toUpperCase()}</IconButton>
-                      </ListItemIcon>
+                      <Avatar style={{width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', marginRight: 10}}>{activeUser.name[0].toUpperCase()}</Avatar>
                       <ListItemText primary={activeUser.name} />
                     </ListItem>
                   )
-                })) : (<div>No active user</div>)
+                })) : (<div style={{color: 'rgba(0, 0, 0, 0.4)'}}>No active user</div>)
               }
             </List>
 
@@ -232,9 +229,9 @@ const ChatHeading = () => {
             </form>
           </Grid>
           {/* <Grid item xs><h2 style={{ margin: 0, padding: 0 }}>{store.getState().chatReducer.activeChat.name}</h2></Grid> */}
-          <Grid item xs={1}>
+          <Grid item xs>
             {activeChat.name !== "Community" ? (
-              <div className="icon-modals-container" style={{ display: 'flex' }}>
+              <div className="icon-modals-container" style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <AddIconModal />
                 <InfoIconModal />
               </div>
