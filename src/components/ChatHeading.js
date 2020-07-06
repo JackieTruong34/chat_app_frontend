@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 
 import Grid from '@material-ui/core/Grid'
@@ -63,9 +63,7 @@ const AddIconModal = () => {
     console.log('receivers: ', receivers)
     if (receivers) {
       socket.emit(ADD_USER_TO_CHAT, { receivers, activeChat, chats: store.getState().chatReducer.chats })
-
     }
-
   }
 
   const handleClick = () => {
@@ -81,7 +79,6 @@ const AddIconModal = () => {
       setReceivers(receivers => [...receivers, receiver])
     } else {
       const newReceiversArr = receiversRef.current.filter(item=>item !== receiver)
-      console.log(newReceiversArr)
       setReceivers(newReceiversArr)
     }
   }
@@ -205,7 +202,14 @@ const ChatHeading = () => {
   const store = useStore()
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const socket = useSelector(state => state.socketReducer.socket)
-  const [chatName, setChatName] = React.useState("")
+  const [chatName, setChatName] = React.useState(store.getState().chatReducer.activeChat.name)
+  const chatNameRef = React.useRef()
+  chatNameRef.current = chatName
+
+  useEffect(()=>{
+    setChatName(store.getState().chatReducer.activeChat.name)
+  },[store.getState().chatReducer.activeChat])
+  
   const handleChange = (e) => {
     setChatName(e.target.value)
   }
@@ -213,8 +217,9 @@ const ChatHeading = () => {
   const handleChangeChatName = (e) => {
     e.preventDefault()
     socket.emit(CHANGE_CHAT_NAME, { activeChat: activeChat, newChatName: chatName })
-    setChatName("")
+    setChatName(chatNameRef.current)
   }
+
   return (
     <div className="heading-container" style={{ height: 52, borderBottom: '1px solid lightgrey' }}>
       <div className="container" style={{ padding: '1vh 1vw' }}>
@@ -222,10 +227,8 @@ const ChatHeading = () => {
           <Grid item xs >
             <form type="text" onSubmit={handleChangeChatName} style={{ display: 'flex' }}>
               {/* <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}></div> */}
-
-              <Input style={{ width: '200px' }} defaultValue={store.getState().chatReducer.activeChat.name} disableUnderline={true} onChange={handleChange} inputProps={{ style: { fontWeight: 'bold', fontSize: '18.72px' } }} />
+              <Input style={{ width: '200px' }} value={chatNameRef.current} disableUnderline={true} onChange={handleChange} inputProps={{ style: { fontWeight: 'bold', fontSize: '18.72px' } }} />
               {chatName ? (<Button type="submit">Change</Button>) : null}
-
             </form>
           </Grid>
           {/* <Grid item xs><h2 style={{ margin: 0, padding: 0 }}>{store.getState().chatReducer.activeChat.name}</h2></Grid> */}

@@ -147,7 +147,7 @@ const ChatContainer = () => {
         // Object.assign({}, store.getState().chatReducer.activeChat, { name: store.getState().chatReducer.activeChat.users.concat(newUser).join(", "), users: store.getState().chatReducer.activeChat.users.concat(newUser) })
         if (store.getState().chatReducer.activeChat) {
           if (chat._id === store.getState().chatReducer.activeChat._id) {
-            dispatch(setActiveChat(Object.assign({}, chat, { name: chat.name.concat(newUser.map(user => { return `, ${user.name}` })), users: chat.users.concat(newUser.map(user => { return user._id })) })))
+            dispatch(setActiveChat(Object.assign({}, chat, {users: chat.users.concat(newUser.map(user => { return user._id })) })))
           }
         }
 
@@ -168,7 +168,6 @@ const ChatContainer = () => {
           }
         }
         return Object.assign({}, chat, { name: newChatName })
-
       }
       return chat
     })
