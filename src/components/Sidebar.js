@@ -95,15 +95,16 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
+    backgroundColor: 'white',
+    borderRadius: '4px',
+    padding: '10px',
+    width: '400px',
+    minHeight: '25vh'
   },
   chatName: {
-    textOverflow: 'ellipsis', 
-    overflow: 'hidden', 
-    whiteSpace: 'nowrap', 
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
     maxWidth: '12vw',
   }
 
@@ -120,6 +121,8 @@ const SidebarHeader = (props) => {
 
   const [receivers, setReceivers] = useState([])
   const [openModal, setOpenModal] = useState(false);
+  const receiversRef = React.useRef()
+  receiversRef.current = receivers
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -147,10 +150,15 @@ const SidebarHeader = (props) => {
   }
 
   const handleChooseReceivers = (receiver) => {
-    setReceivers(receivers => [...receivers, receiver])
+    if (!receivers.includes(receiver)) {
+      setReceivers(receivers => [...receivers, receiver])
+    } else {
+      const newReceiversArr = receiversRef.current.filter(item => item !== receiver)
+      setReceivers(newReceiversArr)
+    }
   }
 
-  const handleCreateNewChat = () => {
+  const handleCreateNewChat = (receivers) => {
     console.log('user group: ', receivers)
     sendPrivateMessage(receivers)
     handleCloseModal()
@@ -227,20 +235,50 @@ const SidebarHeader = (props) => {
               <Fade in={openModal}>
                 <div className={classes.paper}>
                   <List component="nav" aria-label="main mailbox folders" className={classes.list}>
-                    <div className="to" style={{ textAlign: 'center', borderBottom: '1px solid lightgrey' }}>To: </div>
-                    {userList.length !== 0 ? (
-                      userList.filter(activeUser => activeUser.name !== user.name).map((user) => {
-                        return (
-                          <ListItem key={user._id} button onClick={() => handleChooseReceivers(user)}>
-                            <ListItemIcon>
-                              <IconButton>{user.name[0].toUpperCase()}</IconButton>
-                            </ListItemIcon>
-                            <ListItemText primary={user.name} />
-                          </ListItem>
-                        )
-                      })
-                    ) : (<div></div>)}
-                    <Button onClick={() => { handleCreateNewChat(); setReceivers([]) }}>Create Chat</Button>
+                    <div className="modal-header" style={{ borderBottom: '1px solid lightgrey', textAlign: 'center', padding: '7px 5px' }}>
+                      <Grid container>
+                        <Grid item xs={2}>
+                          <Button size="small" color="secondary" onClick={() => { handleCloseModal(); setReceivers([]) }}>Cancel</Button>
+                        </Grid>
+                        <Grid item xs>
+                          <div class="add-user-title" style={{ fontWeight: 'bold'}}>To</div>
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Button size="small" color="primary" onClick={() => { handleCreateNewChat(receivers); handleCloseMenu(); setReceivers([]) }}>Done</Button>
+                        </Grid>
+
+                      </Grid>
+                    </div>
+                    <div className="chosen-receivers" style={{ minHeight: 40, width: '100%', borderBottom: '1px solid lightgrey', display: 'flex', flexWrap: 'wrap' }}>
+                      {receivers.length === 0 ? (
+                        <div className="title" style={{ margin: 'auto 0', height: 'fit-content', color: 'rgba(0, 0, 0, 0.4)' }}>Send to:</div>
+                      ) : (
+                          receiversRef.current.map(receiver => {
+                            return (
+                              <div key={receiver._id} className="receiver" style={{ backgroundColor: 'lightblue', borderRadius: '2px', height: 'fit-content', width: 'fit-content', margin: '7px 5px', padding: '7px 5px' }}>{receiver.name}</div>
+
+                            )
+                          })
+                        )}
+
+                    </div>
+
+                    <List component="nav" aria-label="main mailbox folders" className={classes.list}>
+                      {userList.filter(activeUser => activeUser.name !== user.name).length !== 0 ?
+                        (userList.filter(activeUser => activeUser.name !== user.name).map((activeUser) => {
+                          return (
+                            <ListItem key={activeUser._id} button onClick={() => {
+                              // sendPrivateMessage(activeUser);
+                              handleChooseReceivers(activeUser);
+                            }}>
+                              <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', marginRight: 10 }}>{activeUser.name[0].toUpperCase()}</Avatar>
+                              <ListItemText primary={activeUser.name} />
+                            </ListItem>
+                          )
+                        })) : (<div style={{ color: 'rgba(0, 0, 0, 0.4)' }}>No active user</div>)
+                      }
+                    </List>
+
                   </List>
                 </div>
               </Fade>
@@ -365,7 +403,7 @@ const ChatList = () => {
                 </Grid>
                 <Grid item xs={2} lg={1} style={{ display: 'inherit', justifyContent: 'flex-end' }}>
                   {isHovered[index] &&
-                    <div className="chat-options-button" style={{margin: 'auto'}}>
+                    <div className="chat-options-button" style={{ margin: 'auto' }}>
                       <IconButton size="small" style={{ margin: 'auto', padding: 0 }} onClick={(event) => { handleOpenMenu(event, index) }}>
                         <MoreHorizIcon />
                       </IconButton>
