@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import Sidebar from './Sidebar'
 import ActiveUserList from './ActiveUserList'
 import Grid from '@material-ui/core/Grid'
-import { MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, ACTIVE_CHAT, DELETE_CHAT, CHANGE_CHAT_NAME } from '../Events'
+import { MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, ACTIVE_CHAT, DELETE_CHAT, CHANGE_CHAT_NAME, LEAVE_GROUP } from '../Events'
 import ChatHeading from './ChatHeading'
 import Messages from './Messages'
 import MessageInput from './MessageInput'
@@ -53,6 +53,7 @@ const ChatContainer = () => {
 
     socket.on(NEW_CHAT_USER, addUserToChat)
     socket.on(CHANGE_CHAT_NAME, changeChatName)
+    socket.on(LEAVE_GROUP, leaveGroup)
   }
 
   // Adds chat to the chat container, if reset is true removes all chats
@@ -141,7 +142,6 @@ const ChatContainer = () => {
   }
 
   var addUserToChat = ({ chatId, newUser }) => {
-    console.log('newUser: ', newUser.map(user => { return user.name }))
     const newChats = store.getState().chatReducer.chats.map(chat => {
       if (chat._id === chatId) {
         // Object.assign({}, store.getState().chatReducer.activeChat, { name: store.getState().chatReducer.activeChat.users.concat(newUser).join(", "), users: store.getState().chatReducer.activeChat.users.concat(newUser) })
@@ -155,7 +155,6 @@ const ChatContainer = () => {
       }
       return chat
     })
-    console.log('newChats: ', newChats)
     dispatch(setChats(newChats))
   }
 
@@ -175,6 +174,37 @@ const ChatContainer = () => {
     dispatch(setChats(newChats))
   }
 
+  var leaveGroup = ({chat, isSender})=>{
+    console.log('isSender: ', chat)
+    if(isSender===false){
+      const newChats = store.getState().chatReducer.chats.map(item => {
+        if (item._id === chat._id) {
+  
+          if (store.getState().chatReducer.activeChat) {
+            if (item._id === store.getState().chatReducer.activeChat._id) {
+              dispatch(setActiveChat(Object.assign({}, item, { users: chat.users })))
+            }
+          }
+  
+          return Object.assign({}, item, { users: chat.users })
+        }
+  
+        return item
+      })
+      console.log('new chats: ', newChats)
+  
+      dispatch(setChats(newChats))
+    } else if(isSender === true) {
+      var newChats = store.getState().chatReducer.chats.filter(item=>{
+        return item._id !== chat._id
+      })
+      console.log('new chat abc: ', newChats)
+      dispatch(setActiveChat(null))
+      dispatch(setChats(newChats))
+
+    }
+   
+  }
 
   // remove users from chat
   var removeUsersFromChat = (removeUsers) => {

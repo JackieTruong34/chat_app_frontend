@@ -109,7 +109,7 @@ const AddIconModal = () => {
                   <Button onClick={() => { handleClose(); setReceivers([]); }} color="secondary" size="small" >Cancel</Button>
                 </Grid>
                 <Grid item xs style={{ margin: 'auto', height: 'fit-content' }}>
-                  <div class="add-user-title" style={{fontWeight: 'bold'}}>Add More People</div>
+                  <div className="add-user-title" style={{fontWeight: 'bold'}}>Add More People</div>
                 </Grid>
                 {/* done button */}
                 <Grid item xs={2}>

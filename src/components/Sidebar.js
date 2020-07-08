@@ -24,7 +24,7 @@ import { getTime } from '../Factories'
 import Avatar from '@material-ui/core/Avatar'
 
 // import socket events
-import { PRIVATE_CHAT, LOGOUT, DELETE_CHAT } from '../Events'
+import { PRIVATE_CHAT, LOGOUT, DELETE_CHAT, LEAVE_GROUP } from '../Events'
 
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { logout, setReceiver } from '../actions/userActions'
@@ -144,11 +144,6 @@ const SidebarHeader = (props) => {
     setAnchorEl(null)
   }
 
-  const sendPrivateMessage = (receivers) => {
-    socket.emit(PRIVATE_CHAT, { sender: user, receivers, chats })
-
-  }
-
   const handleChooseReceivers = (receiver) => {
     if (!receivers.includes(receiver)) {
       setReceivers(receivers => [...receivers, receiver])
@@ -160,7 +155,7 @@ const SidebarHeader = (props) => {
 
   const handleCreateNewChat = (receivers) => {
     console.log('user group: ', receivers)
-    sendPrivateMessage(receivers)
+    socket.emit(PRIVATE_CHAT, { sender: user, receivers: receivers, chats })
     handleCloseModal()
   }
 
@@ -241,7 +236,7 @@ const SidebarHeader = (props) => {
                           <Button size="small" color="secondary" onClick={() => { handleCloseModal(); setReceivers([]) }}>Cancel</Button>
                         </Grid>
                         <Grid item xs>
-                          <div class="add-user-title" style={{ fontWeight: 'bold'}}>To</div>
+                          <div className="add-user-title" style={{ fontWeight: 'bold'}}>To</div>
                         </Grid>
                         <Grid item xs={2}>
                           <Button size="small" color="primary" onClick={() => { handleCreateNewChat(receivers); handleCloseMenu(); setReceivers([]) }}>Done</Button>
@@ -370,6 +365,10 @@ const ChatList = () => {
     socket.emit(DELETE_CHAT, { chatId: activeChat._id })
   }
 
+  const handleLeaveGroup = ()=>{
+    socket.emit(LEAVE_GROUP, {sender: user, chat: activeChat})
+  }
+
   return (
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat, index) => {
@@ -408,12 +407,11 @@ const ChatList = () => {
                         <MoreHorizIcon />
                       </IconButton>
                       <Menu id="option-menu" anchorEl={anchorEl} keepMounted open={isMenuOpened[index] ? (isMenuOpened[index]) : (false)} onClose={() => handleCloseMenu(index)}>
-                        {chat.users.length > 2 ? (<MenuItem onClick={() => { handleCloseMenu(index) }}>Leave Group</MenuItem>) : null}
+                        {chat.users.length > 2 ? (<MenuItem onClick={() => { handleCloseMenu(index); handleLeaveGroup() }}>Leave Group</MenuItem>) : null}
 
                         <MenuItem onClick={() => { handleCloseMenu(index); handleDeleteChat() }}>Delete</MenuItem>
                       </Menu>
                     </div>
-
                   }
                 </Grid>
               </Grid>
