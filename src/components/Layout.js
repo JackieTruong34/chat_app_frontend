@@ -24,19 +24,21 @@ const Layout = (props) => {
   useEffect(() => {
     const socket = io(socketURL)
     socket.on('connect', () => {
-      // if(user){
-      //   reconnect(socket)
-      // }else{
-      // }
-      console.log('Socket connected!')
+      if (user) {
+        reconnect(socket)
+      } else {
+        console.log('Socket connected!')
+
+      }
+
 
     })
     dispatch(setSocket(socket))
   }, [])
 
   var reconnect = (socket) => {
-    socket.emit(VERIFY_USER, user.name, ({ isUser, user }) => {
-      if (isUser) {
+    socket.emit(VERIFY_USER, user.name, ({ isUserOnline, user, error }) => {
+      if (isUserOnline) {
         dispatch(setUser({}))
       } else {
         dispatch(setUser(user))
@@ -53,7 +55,7 @@ const Layout = (props) => {
     <div className="contaienr">
       {JSON.stringify(user) === '{}' ? (
         <div>
-          <LoginSignupTabs/>
+          <LoginSignupTabs />
         </div>
 
       ) : <ChatContainer />}
