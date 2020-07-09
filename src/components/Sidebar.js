@@ -373,7 +373,11 @@ const ChatList = () => {
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat, index) => {
         if (chat.name) {
-          const lastMessage = chat.messages[chat.messages.length - 1];
+
+          const lastMess = chat.messages.filter(mes=>{
+            return mes.isNotification !== true
+          })
+          const lastMessage = lastMess[lastMess.length-1];
           return (
             <div
               className={classes.chats}
@@ -392,7 +396,7 @@ const ChatList = () => {
                   <div className={`chat-name ${classes.chatName}`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
                   <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small' }}>
                     <Grid item xs={10} lg >
-                      <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined && chat.isNotification === false ? lastMessage.message : 'No messages!'}</div>
+                      <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
                     </Grid>
                     <Grid item xs={2}>
                       <div className="chat-time" style={{ textAlign: 'right' }}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>

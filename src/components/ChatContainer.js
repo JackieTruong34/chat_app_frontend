@@ -21,6 +21,7 @@ const ChatContainer = () => {
   const store = useStore()
   const dispatch = useDispatch()
 
+  console.log('chats: ', store.getState().chatReducer.chats)
   // componentDidMount()
   useEffect(() => {
     initSocket(socket)
@@ -89,6 +90,8 @@ const ChatContainer = () => {
 
   var receiveMessage = (chatId) => {
     return (message) => {
+    console.log('call this receiver message function ', message)
+
       var newChats = store.getState().chatReducer.chats.map((chat) => {
         // only append messages array of an active chat
         if (chat._id === chatId) {
@@ -201,7 +204,7 @@ const ChatContainer = () => {
       console.log('new chat abc: ', newChats)
       dispatch(setActiveChat(null))
       dispatch(setChats(newChats))
-
+      socket.off(`${MESSAGE_RECEIVED}-${chat._id}`)
     }
    
   }

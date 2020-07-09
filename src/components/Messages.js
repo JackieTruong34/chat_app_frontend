@@ -73,7 +73,7 @@ const MessageList = () => {
                 {mes.isNotification ?
                   (
                     <div className="notification">
-                      <div className="notification-message">
+                      <div className="notification-message" style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.4)', fontSize: '12px'}}>
                         <p>{mes.message}</p>
                       </div>
                     </div>
