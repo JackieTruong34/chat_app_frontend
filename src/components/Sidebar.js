@@ -386,20 +386,20 @@ const ChatList = () => {
               <Grid container>
                 <Grid item xs={3} lg={2}>
                   <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', margin: 5 }}>{chat.name[0].toUpperCase()}</Avatar>
-
                 </Grid>
 
                 <Grid item xs style={{ padding: '0.8vh 0' }}>
                   <div className={`chat-name ${classes.chatName}`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
                   <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small' }}>
                     <Grid item xs={10} lg >
-                      <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
+                      <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined && chat.isNotification === false ? lastMessage.message : 'No messages!'}</div>
                     </Grid>
                     <Grid item xs={2}>
                       <div className="chat-time" style={{ textAlign: 'right' }}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>
                     </Grid>
                   </Grid>
                 </Grid>
+
                 <Grid item xs={2} lg={1} style={{ display: 'inherit', justifyContent: 'flex-end' }}>
                   {isHovered[index] &&
                     <div className="chat-options-button" style={{ margin: 'auto' }}>

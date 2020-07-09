@@ -35,8 +35,8 @@ const MessageInput = (props) => {
   const socket = useSelector(state => state.socketReducer.socket)
   const activeChat = useSelector(state => state.chatReducer.activeChat)
 
-  var sendMessage = (chatId, message) => {
-    socket.emit(MESSAGE_SENT, { chatId, message })
+  var sendMessage = (chatId, message, isNotification) => {
+    socket.emit(MESSAGE_SENT, { chatId, message, isNotification })
   }
 
   var sendTyping = (chatId, isTyping) => {
@@ -70,7 +70,7 @@ const MessageInput = (props) => {
 
   var handleSubmit = (e) => {
     e.preventDefault()
-    sendMessage(activeChat._id, message)
+    sendMessage(activeChat._id, message, false)
     setMessage("")
 
   }

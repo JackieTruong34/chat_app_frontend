@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { useSelector, useStore } from 'react-redux'
 import IconButton from '@material-ui/core/IconButton'
-import {getTime} from '../Factories'
+import { getTime } from '../Factories'
 import Avatar from '@material-ui/core/Avatar'
 
 
@@ -18,9 +18,9 @@ const useStyles = makeStyles(() => ({
   },
   time: {
     margin: '1vh 0.5% 0 1.2%',
-   
+
   },
-  hidden:{
+  hidden: {
     marginTop: '1vh',
     visibility: 'hidden'
   },
@@ -49,10 +49,10 @@ const TypingIndicator = (props) => {
 const MessageList = () => {
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const user = useSelector(state => state.userReducer.user)
-  
+
   const classes = useStyles()
 
-  const randomColor = ()=>{
+  const randomColor = () => {
     let r = Math.round((Math.random() * 255)); //red 0 to 255
     let g = Math.round((Math.random() * 255)); //green 0 to 255
     let b = Math.round((Math.random() * 255)); //blue 0 to 255
@@ -60,27 +60,38 @@ const MessageList = () => {
     return 'rgb(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
   }
 
- 
+
 
   return (
     <div>
       {
         activeChat.messages.length !== 0 ? (
           activeChat.messages.map((mes, index) => {
+
             return (
-              <div key={index} className={`message-container ${mes.sender.name === user.name && "right"}`} >
-                
-                <div className={`icon ${mes.sender.name === user.name? `${classes.hidden}`:`${classes.show}`}`}>
-                  {/* <IconButton size="small" style={{width: 40, height: 40, borderRadius: '50%'}}>
-                    
-                  </IconButton> */}
-                  <Avatar style={{width: 36, height: 36, color: 'white', backgroundColor: 'lightgrey', marginRight: 10}}>{mes.sender.name[0].toUpperCase()}</Avatar>
-                </div>
-                <div className={`message ${classes.message}`}>
-                  <p>{mes.message}</p>
-                </div>
-                <div className={classes.time}><p style={{fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0'}}>{getTime(new Date(mes.time))}</p></div>
-                
+              <div key={index} className="container" >
+                {mes.isNotification ?
+                  (
+                    <div className="notification">
+                      <div className="notification-message">
+                        <p>{mes.message}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={`message-container ${mes.sender.name === user.name && "right"}`}>
+                      <div className={`icon ${mes.sender.name === user.name ? `${classes.hidden}` : `${classes.show}`}`}>
+                        <Avatar style={{ width: 36, height: 36, color: 'white', backgroundColor: 'lightgrey', marginRight: 10 }}>{mes.sender.name[0].toUpperCase()}</Avatar>
+                      </div>
+
+                      <div className={`message ${classes.message}`}>
+                        <p>{mes.message}</p>
+                      </div>
+
+                      <div className={classes.time}><p style={{ fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0' }}>{getTime(new Date(mes.time))}</p></div>
+                    </div>
+
+                  )}
+
               </div>
             )
 
