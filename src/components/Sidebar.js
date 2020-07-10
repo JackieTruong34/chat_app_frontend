@@ -322,6 +322,17 @@ const SidebarSearch = (props) => {
   )
 }
 
+const generateRandomColor= ()=> {
+  let r = Math.round((Math.random() * 255))+ 50; //red 0 to 255
+  let g = Math.round((Math.random() * 255)) + 50; //green 0 to 255
+  let b = Math.round((Math.random() * 255))+ 50; //blue 0 to 255
+  let a = Math.round((Math.random() * 1)); //alpha 0 to 1
+
+  return 'rgb(' + r + ', ' + g + ', ' + b + ', '+ a + ')'
+};
+
+const randomColor = generateRandomColor()
+
 const ChatList = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
@@ -367,6 +378,8 @@ const ChatList = () => {
     socket.emit(LEAVE_GROUP, {sender: user, chat: activeChat})
   }
 
+  
+
   return (
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat, index) => {
@@ -387,7 +400,7 @@ const ChatList = () => {
             >
               <Grid container>
                 <Grid item xs={3} lg={2}>
-                  <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', margin: 5 }}>{chat.name[0].toUpperCase()}</Avatar>
+                  <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: randomColor, margin: 5 }}>{chat.name[0].toUpperCase()}</Avatar>
                 </Grid>
 
                 <Grid item xs style={{ padding: '0.8vh 0' }}>
