@@ -32,7 +32,7 @@ const useStyles = makeStyles(() => ({
 
 const TypingIndicator = (props) => {
   return (
-    <div className="ticontainer" style={{ display: 'flex', flexDirection: 'row' }}>
+    <div className="ticontainer" style={{ display: 'flex', flexDirection: 'row', padding: '0 1vw', marginTop: '1vh', color: 'rgba(0, 0, 0, 0.4)' }}>
       <div className="user-name">
         {props.typing}
       </div>
@@ -72,7 +72,7 @@ const MessageList = () => {
                 {mes.isNotification ?
                   (
                     <div className="notification">
-                      <div className="notification-message" style={{textAlign: 'center', color: 'rgba(0, 0, 0, 0.4)', fontSize: '12px'}}>
+                      <div className="notification-message" style={{ textAlign: 'center', color: 'rgba(0, 0, 0, 0.4)', fontSize: '14px' }}>
                         <p>{mes.message}</p>
                       </div>
                     </div>
@@ -88,12 +88,9 @@ const MessageList = () => {
 
                       <div className={classes.time}><p style={{ fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0' }}>{getTime(new Date(mes.time))}</p></div>
                     </div>
-
                   )}
-
               </div>
             )
-
           })
         ) : (
             <div>Say hi to your partner</div>
@@ -124,15 +121,18 @@ const Messages = (props) => {
       <div className="thread">
         <MessageList />
         <div ref={messagesEndRef} />
-        {
-          store.getState().chatReducer.activeChat.typingUsers.map((name) => {
-            return (
-              <TypingIndicator key={activeChat._id} typing={`${name} is typing`} />
-            )
-          })
-        }
-      </div>
 
+        <div className="typing-indicator-container" style={{ height: 30 }}>
+          {/* <TypingIndicator key={activeChat._id} typing={`someone is typing`} /> */}
+          {
+            store.getState().chatReducer.activeChat.typingUsers.map((name) => {
+              return (
+                <TypingIndicator key={activeChat._id} typing={`${name} is typing`} />
+              )
+            })
+          }
+        </div>
+      </div>
     </div>
   )
 }

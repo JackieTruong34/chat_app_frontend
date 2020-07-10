@@ -132,7 +132,7 @@ const MessageInput = (props) => {
           </Grid>
           <Grid item xs={1}>
             {message ? (
-              <Button color="secondary" disabled={message.length < 1} type="submit" size="small" style={{width: 'fit-content', padding: 0, margin: '13px 0 0 0'}}>
+              <Button color="secondary" disabled={message.length < 1} type="submit" size="small" style={{width: 'fit-content', padding: 0, margin: '13px 0 0 0', minWidth: 0}}>
                 <SendIcon style={{ fontSize: '25px', margin: 0, padding: 0, color: '#0099FF'}} />
               </Button>
             ) : (

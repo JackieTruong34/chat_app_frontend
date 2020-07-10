@@ -9,7 +9,7 @@ import Messages from './Messages'
 import MessageInput from './MessageInput'
 
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { setUserList,  } from '../actions/userActions'
+import { setUserList, } from '../actions/userActions'
 import { setChats, setActiveChat } from '../actions/chatActions'
 
 const ChatContainer = () => {
@@ -23,23 +23,17 @@ const ChatContainer = () => {
   // componentDidMount()
   useEffect(() => {
     initSocket(socket)
-    
+
   }, [])
 
   // componentWillUnmount()
   // useEffect(()=>{
   //   return () => {
-  //     socket.off(PRIVATE_CHAT)
-  //     socket.off(USER_CONNECTED)
   //     socket.off(USER_DISCONNECTED)
-  //     socket.off(NEW_CHAT_USER)
-  //     socket.off(CHANGE_CHAT_NAME)
-  //     socket.off(LEAVE_GROUP)
-  //     socket.off(DELETE_CHAT)
   //   }
 
   // }, [])
-  
+
 
   var initSocket = (socket) => {
     socket.on(PRIVATE_CHAT, addChat)
@@ -47,30 +41,21 @@ const ChatContainer = () => {
     socket.on(DELETE_CHAT, deleteChat)
 
     // listen on event when user is connected
-    socket.on(USER_CONNECTED, (connectedUsers) => {
-      dispatch(setUserList([]))
-      console.log('connected users: ', connectedUsers)
-      for (let key in connectedUsers) {
-        const newUserList = [...store.getState().userReducer.userList, connectedUsers[key]]
-        dispatch(setUserList(newUserList))
-      }
+    socket.on(USER_CONNECTED, (arrayConnectedUsers) => {
+      dispatch(setUserList(arrayConnectedUsers))
 
     })
 
     // listen on event when user is disconnected
-    socket.on(USER_DISCONNECTED, ({connectedUsers, userName}) => {
-      dispatch(setUserList([]))
-      console.log('connected users: ', connectedUsers)
-      for (let key in connectedUsers) {
-        const newUserList = [...store.getState().userReducer.userList, connectedUsers[key]]
-        dispatch(setUserList(newUserList))
-      }
-      if(userName === user.name){
-        dispatch(setChats([]))
-        dispatch(setActiveChat(null))
-      }
+    socket.on(USER_DISCONNECTED, (arrayConnectedUsers) => {
+      dispatch(setUserList(arrayConnectedUsers))
       
-      socket.off(PRIVATE_CHAT)
+      // if(userName === user.name){
+      //   dispatch(setChats([]))
+      //   dispatch(setActiveChat(null))
+      // }
+
+      // socket.off(PRIVATE_CHAT)
 
     })
 
@@ -120,7 +105,6 @@ const ChatContainer = () => {
   var receiveTyping = (chatId) => {
     return ({ sender, isTyping }) => {
       // only show the "user is typing" for the client that is not the sender
-
       if (sender.name !== user.name) {
         var newChats = store.getState().chatReducer.chats.map((chat) => {
           if (chat._id === chatId) {
