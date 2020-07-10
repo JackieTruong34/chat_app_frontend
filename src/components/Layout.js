@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react'
 import io from 'socket.io-client'
-import { LOGOUT, VERIFY_USER } from '../Events'
-import LoginForm from './LoginForm'
+import { VERIFY_USER } from '../Events'
 import ChatContainer from './ChatContainer'
-import SignupForm from './SignupForm'
 import LoginSignupTabs from './LoginSignupTabs'
 
 // import dispatch, selector
@@ -16,7 +14,6 @@ const socketURL = "http://localhost:3001"
 const Layout = (props) => {
   const dispatch = useDispatch()
   const store = useStore()
-  const socket = useSelector(state => state.socketReducer.socket)
   const user = useSelector(state => state.userReducer.user)
   // console.log('state: ', store.getState())
 
@@ -24,13 +21,13 @@ const Layout = (props) => {
   useEffect(() => {
     const socket = io(socketURL)
     socket.on('connect', () => {
-      if (user) {
+      console.log('user?: ', !store.getState().userReducer.user)
+      if (!store.getState().userReducer.user) {
         reconnect(socket)
       } else {
         console.log('Socket connected!')
-
       }
-
+      
 
     })
     dispatch(setSocket(socket))
@@ -44,11 +41,6 @@ const Layout = (props) => {
         dispatch(setUser(user))
       }
     })
-  }
-
-  var setLogoutFunc = () => {
-    socket.emit(LOGOUT)
-    setUser(null)
   }
 
   return (

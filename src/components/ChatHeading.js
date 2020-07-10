@@ -10,7 +10,6 @@ import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import Button from '@material-ui/core/Button'
 import Input from '@material-ui/core/Input'
@@ -195,7 +194,6 @@ const InfoIconModal = () => {
 }
 
 const ChatHeading = () => {
-  const classes = useStyles()
   const store = useStore()
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const socket = useSelector(state => state.socketReducer.socket)

@@ -43,7 +43,6 @@ const ActiveUser = (props) => {
 
 const ActiveUserList = () => {
   const classes = useStyles();
-  const store = useStore()
   const userList = useSelector(state => state.userReducer.userList)
   const user = useSelector(state => state.userReducer.user)
   const socket = useSelector(state => state.socketReducer.socket)

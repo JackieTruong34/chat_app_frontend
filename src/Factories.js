@@ -1,5 +1,4 @@
 // create unique id for each user
-const uuidv4 = require('bson-objectid')
 const mongoose = require('mongoose')
 
 // create user

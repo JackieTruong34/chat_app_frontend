@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { useSelector, useStore } from 'react-redux'
-import IconButton from '@material-ui/core/IconButton'
 import { getTime } from '../Factories'
 import Avatar from '@material-ui/core/Avatar'
 
@@ -105,7 +104,6 @@ const MessageList = () => {
 }
 
 const Messages = (props) => {
-  const classes = useStyles()
 
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const store = useStore()

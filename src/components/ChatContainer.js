@@ -3,15 +3,14 @@ import React, { useEffect } from 'react'
 import Sidebar from './Sidebar'
 import ActiveUserList from './ActiveUserList'
 import Grid from '@material-ui/core/Grid'
-import { MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, ACTIVE_CHAT, DELETE_CHAT, CHANGE_CHAT_NAME, LEAVE_GROUP } from '../Events'
+import { MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, DELETE_CHAT, CHANGE_CHAT_NAME, LEAVE_GROUP } from '../Events'
 import ChatHeading from './ChatHeading'
 import Messages from './Messages'
 import MessageInput from './MessageInput'
 
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { setUserList } from '../actions/userActions'
+import { setUserList,  } from '../actions/userActions'
 import { setChats, setActiveChat } from '../actions/chatActions'
-import { SET_ACTIVE_CHAT } from '../actions/actionTypes'
 
 const ChatContainer = () => {
   const socket = useSelector(state => state.socketReducer.socket)
@@ -21,15 +20,28 @@ const ChatContainer = () => {
   const store = useStore()
   const dispatch = useDispatch()
 
-  console.log('chats: ', store.getState().chatReducer.chats)
   // componentDidMount()
   useEffect(() => {
     initSocket(socket)
+    
   }, [])
 
+  // componentWillUnmount()
+  // useEffect(()=>{
+  //   return () => {
+  //     socket.off(PRIVATE_CHAT)
+  //     socket.off(USER_CONNECTED)
+  //     socket.off(USER_DISCONNECTED)
+  //     socket.off(NEW_CHAT_USER)
+  //     socket.off(CHANGE_CHAT_NAME)
+  //     socket.off(LEAVE_GROUP)
+  //     socket.off(DELETE_CHAT)
+  //   }
+
+  // }, [])
+  
+
   var initSocket = (socket) => {
-    // socket.emit(COMMUNITY_CHAT, resetChat)
-    // listen on private message namespace
     socket.on(PRIVATE_CHAT, addChat)
 
     socket.on(DELETE_CHAT, deleteChat)
@@ -37,44 +49,41 @@ const ChatContainer = () => {
     // listen on event when user is connected
     socket.on(USER_CONNECTED, (connectedUsers) => {
       dispatch(setUserList([]))
+      console.log('connected users: ', connectedUsers)
       for (let key in connectedUsers) {
         const newUserList = [...store.getState().userReducer.userList, connectedUsers[key]]
         dispatch(setUserList(newUserList))
       }
+
     })
 
     // listen on event when user is disconnected
-    socket.on(USER_DISCONNECTED, (connectedUsers) => {
+    socket.on(USER_DISCONNECTED, ({connectedUsers, userName}) => {
       dispatch(setUserList([]))
+      console.log('connected users: ', connectedUsers)
       for (let key in connectedUsers) {
         const newUserList = [...store.getState().userReducer.userList, connectedUsers[key]]
         dispatch(setUserList(newUserList))
       }
+      if(userName === user.name){
+        dispatch(setChats([]))
+        dispatch(setActiveChat(null))
+      }
+      
+      socket.off(PRIVATE_CHAT)
+
     })
 
     socket.on(NEW_CHAT_USER, addUserToChat)
+
     socket.on(CHANGE_CHAT_NAME, changeChatName)
+
     socket.on(LEAVE_GROUP, leaveGroup)
   }
 
-  // Adds chat to the chat container, if reset is true removes all chats
-  // and sets that chat to the main chat.
-  // Sets the message and typing socket events for the chat.
-  // the chat parameter here is the result of the callback function createChat() in the socketManager
-  var resetChat = (chat) => {
-    return addChat(chat, true)
-  }
-
-  var deleteChat = (chat) => {
-    const newChats = store.getState().chatReducer.chats.filter(object => object._id !== chat._id)
-    dispatch(setChats(newChats))
-    dispatch(setActiveChat(null))
-
-  }
-
-  var addChat = (chat, reset = false) => {
-    const newChats = reset ? [chat] : [...store.getState().chatReducer.chats, chat]
-
+  var addChat = (chat) => {
+    console.log('call this function')
+    const newChats = [...store.getState().chatReducer.chats, chat]
     dispatch(setChats(newChats))
 
     const messageEvent = `${MESSAGE_RECEIVED}-${chat._id}`
@@ -90,8 +99,6 @@ const ChatContainer = () => {
 
   var receiveMessage = (chatId) => {
     return (message) => {
-    console.log('call this receiver message function ', message)
-
       var newChats = store.getState().chatReducer.chats.map((chat) => {
         // only append messages array of an active chat
         if (chat._id === chatId) {
@@ -99,14 +106,11 @@ const ChatContainer = () => {
           if (store.getState().chatReducer.activeChat) {
             if (chat._id !== store.getState().chatReducer.activeChat._id) {
               chat.hasNewMessages = true
-
             }
           } else {
             chat.hasNewMessages = true
           }
         }
-
-
         return chat
       })
       dispatch(setChats(newChats))
@@ -150,7 +154,7 @@ const ChatContainer = () => {
         // Object.assign({}, store.getState().chatReducer.activeChat, { name: store.getState().chatReducer.activeChat.users.concat(newUser).join(", "), users: store.getState().chatReducer.activeChat.users.concat(newUser) })
         if (store.getState().chatReducer.activeChat) {
           if (chat._id === store.getState().chatReducer.activeChat._id) {
-            dispatch(setActiveChat(Object.assign({}, chat, {users: chat.users.concat(newUser.map(user => { return user._id })) })))
+            dispatch(setActiveChat(Object.assign({}, chat, { users: chat.users.concat(newUser.map(user => { return user._id })) })))
           }
         }
 
@@ -173,50 +177,44 @@ const ChatContainer = () => {
       }
       return chat
     })
-    console.log('new chats: ', newChats)
     dispatch(setChats(newChats))
   }
 
-  var leaveGroup = ({chat, isSender})=>{
-    console.log('isSender: ', chat)
-    if(isSender===false){
+  var leaveGroup = ({ chat, isSender }) => {
+    if (isSender === false) {
       const newChats = store.getState().chatReducer.chats.map(item => {
         if (item._id === chat._id) {
-  
+
           if (store.getState().chatReducer.activeChat) {
             if (item._id === store.getState().chatReducer.activeChat._id) {
               dispatch(setActiveChat(Object.assign({}, item, { users: chat.users })))
             }
           }
-  
+
           return Object.assign({}, item, { users: chat.users })
         }
-  
+
         return item
       })
-      console.log('new chats: ', newChats)
-  
+
       dispatch(setChats(newChats))
-    } else if(isSender === true) {
-      var newChats = store.getState().chatReducer.chats.filter(item=>{
+    } else if (isSender === true) {
+      var newChats = store.getState().chatReducer.chats.filter(item => {
         return item._id !== chat._id
       })
-      console.log('new chat abc: ', newChats)
       dispatch(setActiveChat(null))
       dispatch(setChats(newChats))
       socket.off(`${MESSAGE_RECEIVED}-${chat._id}`)
     }
-   
+
   }
 
-  // remove users from chat
-  var removeUsersFromChat = (removeUsers) => {
-    const newChats = chats.map(chat => {
-      let newUsers = chat.users.filter(user => !removeUsers.includes(user))
-      return Object.assign({}, chat, { users: newUsers })
-    })
+  var deleteChat = (chat) => {
+    const newChats = store.getState().chatReducer.chats.filter(object => object._id !== chat._id)
     dispatch(setChats(newChats))
+    dispatch(setActiveChat(null))
   }
+
 
   // render component
   return (
