@@ -25,8 +25,9 @@ const useStyles = makeStyles(() => ({
   },
   show: {
     marginTop: '1vh',
+    marginRight: 7,
     visibility: 'visible',
-    padding: '5px 0'
+    display: 'flex'
   }
 }))
 
@@ -60,7 +61,7 @@ const MessageList = () => {
   }
 
 
-
+  console.log(activeChat.messages)
   return (
     <div>
       {
@@ -79,7 +80,7 @@ const MessageList = () => {
                   ) : (
                     <div className={`message-container ${mes.sender.name === user.name && "right"}`}>
                       <div className={`icon ${mes.sender.name === user.name ? `${classes.hidden}` : `${classes.show}`}`}>
-                        <Avatar style={{ width: 36, height: 36, color: 'white', backgroundColor: 'lightgrey', marginRight: 10 }}>{mes.sender.name[0].toUpperCase()}</Avatar>
+                        <Avatar style={{ width: 32, height: 32, color: 'white', backgroundColor: mes.sender.representPhoto, margin: 'auto' }}>{mes.sender.name[0].toUpperCase()}</Avatar>
                       </div>
 
                       <div className={`message ${classes.message}`}>

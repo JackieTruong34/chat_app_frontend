@@ -2,10 +2,9 @@ import React from 'react'
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader'
-import IconButton from '@material-ui/core/IconButton'
+import Avatar from '@material-ui/core/Avatar'
 
 import { useSelector, useStore } from 'react-redux'
 import { PRIVATE_CHAT } from '../Events'
@@ -33,9 +32,7 @@ const useStyles = makeStyles((theme) => ({
 const ActiveUser = (props) => {
   return (
     <ListItem button onClick={() => props.handleOnClick(props.user)}>
-      <ListItemIcon>
-        <IconButton>{props.user.name[0].toUpperCase()}</IconButton>
-      </ListItemIcon>
+      <Avatar style={{ width: 36, height: 36, color: 'white', backgroundColor: props.user.representPhoto, margin:'5px 12px' }}>{props.user.name[0].toUpperCase()}</Avatar>
       <ListItemText primary={props.user.name} />
     </ListItem>
   )
@@ -50,23 +47,22 @@ const ActiveUserList = () => {
   const chats = useSelector(state => state.chatReducer.chats)
 
   const sendPrivateChat = (receivers) => {
-    console.log('receivers: ', receivers)
     socket.emit(PRIVATE_CHAT, { sender: user, receivers, chats })
-    
+
   }
-  // console.log('connected users: ', store.getState().userReducer.userList)
+  console.log('connected users: ', userList)
 
   var handleOnClick = (receiver) => {
     sendPrivateChat([receiver])
-    
+
   }
 
   return (
     <div className={classes.root}>
-      <ListSubheader 
-        disableGutters={true} 
+      <ListSubheader
+        disableGutters={true}
         style={{ backgroundColor: 'white', width: '100%', height: 52, textAlign: 'center' }}>
-          Active users
+        Active users
       </ListSubheader>
 
       <div className={classes.listContainer}>

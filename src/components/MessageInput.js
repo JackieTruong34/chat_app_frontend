@@ -137,7 +137,7 @@ const MessageInput = (props) => {
               </Button>
             ) : (
               <div className="emoji-container" style={{marginTop: 7}}>
-                <Emoji emoji={{ id: '+1', name: 'Thumbs Up Sign' }} onClick={handleOnThumbUp} set='facebook' size={32} style={{marginTop: '9px'}}/>
+                <Emoji emoji={{ id: '+1', name: 'Thumbs Up Sign' }} onClick={handleOnThumbUp} onOver={{cursor: "pointer"}} set='facebook' size={32} style={{marginTop: '9px'}}/>
               </div>
               )}
 

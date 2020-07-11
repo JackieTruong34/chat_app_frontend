@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { logout, setReceiver } from '../actions/userActions'
 import { setActiveChat } from '../actions/chatActions'
 
+let userProfileColor
 const useStyles = makeStyles((theme) => ({
   search: {
     position: 'relative',
@@ -105,6 +106,12 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     maxWidth: '12vw',
+  },
+  userProfile:{
+    // "&.MuiIconButton-colorPrimary": {backgroundColor: userProfileColor},
+    "&:hover": {
+      cursor: 'pointer'
+    }
   }
 
 }))
@@ -163,15 +170,20 @@ const SidebarHeader = (props) => {
     socket.emit(LOGOUT)
   }
 
+  if(user){
+    userProfileColor = user.representPhoto
+  }
+
   return (
-    <div className="sidebar-header" style={{ height: 'fit-content', margin: '0 0.8vw', maxHeight: 52 }}>
+    <div className="sidebar-header" style={{ height: 'fit-content', margin: '0.5vh 0.8vw', maxHeight: 52 }}>
       <Grid container style={{ height: 52 }}>
         <Grid item xs>
           <Tooltip title="User account" placement="bottom-end">
-            <IconButton size="medium" onClick={handleOpenMenu}>
-              {/* <AccountCircle className={classes.icons}/> */}
+            <Avatar className={classes.userProfile} onClick={handleOpenMenu} style={{ width: 40, height: 40, color: 'white', backgroundColor: user.representPhoto, margin: 5 }}>{user.name[0].toUpperCase()}</Avatar>
+            
+            {/* <IconButton size="medium" onClick={handleOpenMenu} className={classes.userProfile}>
               {JSON.stringify(user) !== '{}' ? user.name[0].toUpperCase() : "Unknown"[0].toUpperCase()}
-            </IconButton>
+            </IconButton> */}
           </Tooltip>
 
           {/* menu when clicking to the user account icon */}
@@ -322,17 +334,6 @@ const SidebarSearch = (props) => {
   )
 }
 
-const generateRandomColor= ()=> {
-  let r = Math.round((Math.random() * 255))+ 50; //red 0 to 255
-  let g = Math.round((Math.random() * 255)) + 50; //green 0 to 255
-  let b = Math.round((Math.random() * 255))+ 50; //blue 0 to 255
-  let a = Math.round((Math.random() * 1)); //alpha 0 to 1
-
-  return 'rgb(' + r + ', ' + g + ', ' + b + ', '+ a + ')'
-};
-
-const randomColor = generateRandomColor()
-
 const ChatList = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
@@ -400,7 +401,7 @@ const ChatList = () => {
             >
               <Grid container>
                 <Grid item xs={3} lg={2}>
-                  <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: randomColor, margin: 5 }}>{chat.name[0].toUpperCase()}</Avatar>
+                  <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: chat.representPhoto, margin: 5 }}>{chat.name[0].toUpperCase()}</Avatar>
                 </Grid>
 
                 <Grid item xs style={{ padding: '0.8vh 0' }}>
