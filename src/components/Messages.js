@@ -60,8 +60,6 @@ const MessageList = () => {
     return 'rgb(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
   }
 
-
-  console.log(activeChat.messages)
   return (
     <div>
       {
@@ -104,6 +102,7 @@ const MessageList = () => {
 const Messages = (props) => {
 
   const activeChat = useSelector(state => state.chatReducer.activeChat)
+  const chosenFiles = useSelector(state => state.messageReducer.chosenFiles)
   const store = useStore()
   // auto scroll down function
   const messagesEndRef = useRef(null)
@@ -118,23 +117,41 @@ const Messages = (props) => {
   }, [activeChat.messages.length])
 
   return (
-    <div className="thread-container">
-      <div className="thread">
-        <MessageList />
-        <div ref={messagesEndRef} />
+    <div>
+      <div className="thread-container">
+        <div className="thread">
+          <MessageList />
+          <div className="typing-indicator-container" style={{ height: 30 }}>
+            {
+              store.getState().chatReducer.activeChat.typingUsers.map((name) => {
+                return (
+                  <TypingIndicator key={activeChat._id} typing={`${name} is typing`} />
+                )
+              })
+            }
+          </div>
+          <div style={{ height: 'fit-content' }}>
+            {chosenFiles.length !== 0 ? (
+              <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'lightblue' }}>
+                {chosenFiles.map(chosenFile => {
+                  return (
+                    <div key={chosenFile.name}>{chosenFile.name}</div>
+                  )
+                })}
+              </div>
+            ) : null
+            }
+          </div>
 
-        <div className="typing-indicator-container" style={{ height: 30 }}>
-          {/* <TypingIndicator key={activeChat._id} typing={`someone is typing`} /> */}
-          {
-            store.getState().chatReducer.activeChat.typingUsers.map((name) => {
-              return (
-                <TypingIndicator key={activeChat._id} typing={`${name} is typing`} />
-              )
-            })
-          }
+          <div ref={messagesEndRef} />
+
+
         </div>
+
       </div>
+
     </div>
+
   )
 }
 

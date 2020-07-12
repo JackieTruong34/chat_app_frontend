@@ -16,3 +16,4 @@ export const SET_ACTIVE_CHAT = "SET_ACTIVE_CHAT"
 // message actions
 export const SET_MESSAGE = "SET_MESSAGE"
 export const SET_IS_TYPING = "SET_IS_TYPING"
+export const SET_CHOSEN_FILES = "SET_CHOSEN_FILES"

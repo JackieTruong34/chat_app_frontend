@@ -1,8 +1,9 @@
-import {SET_MESSAGE, SET_IS_TYPING} from '../actions/actionTypes'
+import {SET_MESSAGE, SET_IS_TYPING, SET_CHOSEN_FILES} from '../actions/actionTypes'
 
 const initState = {
   message: "",
-  isTyping: false
+  isTyping: false,
+  chosenFiles: []
 }
 
 const messageReducer = (state = initState, action)=>{
@@ -13,6 +14,9 @@ const messageReducer = (state = initState, action)=>{
     case SET_IS_TYPING:
       state.isTyping = action.payload
       return {...state, isTyping: state.isTyping}
+    case SET_CHOSEN_FILES:
+      state.chosenFiles = action.payload
+      return {...state, chosenFiles: state.chosenFiles}
     default:
       return state
   }
