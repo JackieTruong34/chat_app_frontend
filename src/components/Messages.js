@@ -3,9 +3,11 @@ import { makeStyles } from '@material-ui/core/styles'
 import { useSelector, useStore } from 'react-redux'
 import { getTime } from '../Factories'
 import Avatar from '@material-ui/core/Avatar'
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
 
-
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   message: {
     backgroundColor: 'rgba(0, 0, 0, .04)',
     borderRadius: '1.3em',
@@ -18,7 +20,7 @@ const useStyles = makeStyles(() => ({
   imageMessage: {
     marginTop: '1vh',
     maxWidth: '25vw',
-    "&:hover":{
+    "&:hover": {
       cursor: 'pointer',
     }
   },
@@ -35,7 +37,16 @@ const useStyles = makeStyles(() => ({
     marginRight: 7,
     visibility: 'visible',
     display: 'flex'
-  }
+  },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    boxShadow: theme.shadows[5],
+    
+  },
 }))
 
 const TypingIndicator = (props) => {
@@ -56,17 +67,15 @@ const TypingIndicator = (props) => {
 const MessageList = () => {
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const user = useSelector(state => state.userReducer.user)
-
+  const [open, setOpen] = React.useState(false)
   const classes = useStyles()
-
-  const randomColor = () => {
-    let r = Math.round((Math.random() * 255)); //red 0 to 255
-    let g = Math.round((Math.random() * 255)); //green 0 to 255
-    let b = Math.round((Math.random() * 255)); //blue 0 to 255
-    let a = Math.round((Math.random() * 1)); // alpha 0 to 1
-    return 'rgb(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
+  const handleOpen = () => {
+    setOpen(true)
   }
 
+  const handleClose = () => {
+    setOpen(false)
+  }
   return (
     <div>
       {
@@ -87,15 +96,36 @@ const MessageList = () => {
                       <div className={`icon ${mes.sender.name === user.name ? `${classes.hidden}` : `${classes.show}`}`}>
                         <Avatar style={{ width: 32, height: 32, color: 'white', backgroundColor: mes.sender.representPhoto, margin: 'auto' }}>{mes.sender.name[0].toUpperCase()}</Avatar>
                       </div>
+
                       {mes.isImage ? (
-                        <div className={classes.imageMessage}>
-                          <img src={"data:" + mes.type +";base64,"+mes.data} alt={mes.name} style={{borderRadius: '1.3em', maxWidth: '25vw', maxHeight: '25vh'}}/>
+                        <div className="image-message-container">
+                          <div className={classes.imageMessage} onClick={handleOpen}>
+                            <img src={"data:" + mes.type + ";base64," + mes.data} alt={mes.name} style={{ borderRadius: '1.3em', maxWidth: '25vw', maxHeight: '25vh' }} />
+                          </div>
+                          <Modal
+                            aria-labelledby="transition-modal-title"
+                            aria-describedby="transition-modal-description"
+                            className={classes.modal}
+                            open={open}
+                            onClose={handleClose}
+                            closeAfterTransition
+                            BackdropComponent={Backdrop}
+                            BackdropProps={{
+                              timeout: 500,
+                            }}
+                          >
+                            <Fade in={open}>
+                              <div className="image-container">
+                                <img src={"data:" + mes.type + ";base64," + mes.data} alt={mes.name} style={{maxWidth: '70vw', maxHeight: '70vh'}} />
+
+                              </div>
+                            </Fade>
+                          </Modal>
                         </div>
+
                       ) : (<div className={`message ${classes.message}`}>
                         <p>{mes.message}</p>
                       </div>)}
-
-
                       <div className={classes.time}><p style={{ fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0' }}>{getTime(new Date(mes.time))}</p></div>
                     </div>
                   )}
@@ -141,15 +171,9 @@ const Messages = (props) => {
               })
             }
           </div>
-          
-
           <div ref={messagesEndRef} />
-
-
         </div>
-
       </div>
-
     </div>
 
   )

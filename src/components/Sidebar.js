@@ -384,7 +384,7 @@ const ChatList = () => {
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat, index) => {
         if (chat.name) {
-
+          
           const lastMess = chat.messages.filter(mes=>{
             return mes.isNotification !== true
           })

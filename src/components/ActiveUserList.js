@@ -6,7 +6,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader'
 import Avatar from '@material-ui/core/Avatar'
 
-import { useSelector, useStore } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { PRIVATE_CHAT } from '../Events'
 
 

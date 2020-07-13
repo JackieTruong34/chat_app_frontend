@@ -34,6 +34,7 @@ const MessageInput = (props) => {
   const [isTyping, setIsTyping] = useState(false)
   const [chosenEmoji, setChosenEmoji] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
+  const [chosenImages, setChosenImages] = useState([])
 
   const socket = useSelector(state => state.socketReducer.socket)
   const activeChat = useSelector(state => state.chatReducer.activeChat)
@@ -61,8 +62,9 @@ const MessageInput = (props) => {
 
   // file message
 
-  var chosenFilesTemp = []
+  var chosenImagesTemp = []
   var chosenFilesArray = []
+  var chosenImagesArray = []
 
   const handleOpenChoosingFilesWindow = () => {
     fileRef.current.click()
@@ -70,15 +72,15 @@ const MessageInput = (props) => {
 
   const handleChoosingFiles = (e) => {
     e.preventDefault()
-    chosenFilesTemp.push(e.target.files)
-    console.log('e: ', chosenFilesTemp)
-    for (var i = 0; i < chosenFilesTemp[0].length; i++) {
-      chosenFilesArray.push(chosenFilesTemp[0][i])
-      
-     
+    chosenImagesTemp.push(e.target.files)
+    console.log('e: ', chosenImagesTemp)
+    for (var i = 0; i < chosenImagesTemp[0].length; i++) {
+      chosenFilesArray.push(chosenImagesTemp[0][i])
+      chosenImagesArray.push(URL.createObjectURL(chosenImagesTemp[0][i]))
+
     }
     dispatch(setChosenFiles(chosenFilesArray))
-
+    setChosenImages(chosenImagesArray)
 
   }
 
@@ -163,10 +165,15 @@ const MessageInput = (props) => {
     <div className={classes.messageInputContainer}>
       <div style={{ height: 'fit-content' }}>
         {chosenFiles.length !== 0 ? (
-          <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'lightblue' }}>
-            {chosenFiles.map(chosenFile => {
+          <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'white', display: 'flex' }}>
+            {chosenImages.map(chosenImage => {
               return (
-                <div key={chosenFile.name}>{chosenFile.name}</div>
+                <div className="chosen-image-container" style={{ margin: 'auto 5px' }} key={chosenImage}>
+                  <div style={{ backgroundImage: `url(${chosenImage})`, backgroundRepeat: 'no-repeat', height: 108, width: 108, backgroundSize: 'cover', borderRadius: 18 }}>
+
+                  </div>
+
+                </div>
               )
             })}
             <IconButton color="primary" size="small" style={{ width: 'fit-content', padding: 0, minWidth: 0, position: 'absolute', top: 0, right: 0 }} onClick={handleRemoveChosenFiles}>
