@@ -8,12 +8,16 @@ import Avatar from '@material-ui/core/Avatar'
 const useStyles = makeStyles(() => ({
   message: {
     backgroundColor: 'rgba(0, 0, 0, .04)',
-    borderRadius: '2em',
+    borderRadius: '1.3em',
     width: 'fit-content',
     height: 'fit-content',
     padding: '0.01vh 1vw',
     marginTop: '1vh',
     maxWidth: '20vw'
+  },
+  imageMessage: {
+    marginTop: '1vh',
+    maxWidth: '25vw'
   },
   time: {
     margin: '1vh 0.5% 0 1.2%',
@@ -80,10 +84,14 @@ const MessageList = () => {
                       <div className={`icon ${mes.sender.name === user.name ? `${classes.hidden}` : `${classes.show}`}`}>
                         <Avatar style={{ width: 32, height: 32, color: 'white', backgroundColor: mes.sender.representPhoto, margin: 'auto' }}>{mes.sender.name[0].toUpperCase()}</Avatar>
                       </div>
-
-                      <div className={`message ${classes.message}`}>
+                      {mes.isImage ? (
+                        <div className={classes.imageMessage}>
+                          <img src={"data:" + mes.type +";base64,"+mes.data} alt={mes.name} style={{borderRadius: '1.3em', maxWidth: '25vw', maxHeight: '25vh'}}/>
+                        </div>
+                      ) : (<div className={`message ${classes.message}`}>
                         <p>{mes.message}</p>
-                      </div>
+                      </div>)}
+
 
                       <div className={classes.time}><p style={{ fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', padding: '4px 0' }}>{getTime(new Date(mes.time))}</p></div>
                     </div>

@@ -49,7 +49,7 @@ const ChatContainer = () => {
     // listen on event when user is disconnected
     socket.on(USER_DISCONNECTED, (arrayConnectedUsers) => {
       dispatch(setUserList(arrayConnectedUsers))
-      
+
       // if(userName === user.name){
       //   dispatch(setChats([]))
       //   dispatch(setActiveChat(null))
@@ -82,7 +82,8 @@ const ChatContainer = () => {
   }
 
   var receiveMessage = (chatId) => {
-    return (message) => {
+    return ({ message }) => {
+      console.log('message: ', message)
       var newChats = store.getState().chatReducer.chats.map((chat) => {
         // only append messages array of an active chat
         if (chat._id === chatId) {
@@ -98,6 +99,7 @@ const ChatContainer = () => {
         return chat
       })
       dispatch(setChats(newChats))
+
     }
   }
 

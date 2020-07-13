@@ -98,8 +98,31 @@ const MessageInput = (props) => {
 
   var handleSubmit = (e) => {
     e.preventDefault()
-    sendMessage(activeChat._id, message, false)
+    if (message) {
+      socket.emit(MESSAGE_SENT, { chatId: activeChat._id, message: message, isNotification: false })
+
+    }
+    // sendMessage(activeChat._id, message, false)
     setMessage("")
+    if (chosenFiles) {
+      chosenFiles.map(chosenFile => {
+        var fileObj = {
+          name: chosenFile.name,
+          size: chosenFile.size,
+          type: chosenFile.type,
+
+        }
+        var fileReader = new FileReader()
+        fileReader.onload = (e) => {
+          var imgSrc = e.target.result
+          socket.emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, {data: imgSrc}), isNotification: false })
+          console.log('img src: ', imgSrc)
+        }
+        fileReader.readAsDataURL(chosenFile)
+      })
+    }
+    dispatch(setChosenFiles([]))
+
   }
 
   var typing = () => {

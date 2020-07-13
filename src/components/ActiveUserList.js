@@ -50,7 +50,6 @@ const ActiveUserList = () => {
     socket.emit(PRIVATE_CHAT, { sender: user, receivers, chats })
 
   }
-  console.log('connected users: ', userList)
 
   var handleOnClick = (receiver) => {
     sendPrivateChat([receiver])

@@ -334,20 +334,6 @@ const SidebarSearch = (props) => {
   )
 }
 
-<<<<<<< Updated upstream
-=======
-// const generateRandomColor= ()=> {
-//   let r = Math.round((Math.random() * 255))+ 50; //red 0 to 255
-//   let g = Math.round((Math.random() * 255)) + 50; //green 0 to 255
-//   let b = Math.round((Math.random() * 255))+ 50; //blue 0 to 255
-//   let a = Math.round((Math.random() * 1)); //alpha 0 to 1
-
-//   return 'rgb(' + r + ', ' + g + ', ' + b + ', '+ a + ')'
-// };
-
-// const randomColor = generateRandomColor()
-
->>>>>>> Stashed changes
 const ChatList = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
