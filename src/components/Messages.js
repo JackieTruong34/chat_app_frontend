@@ -17,7 +17,10 @@ const useStyles = makeStyles(() => ({
   },
   imageMessage: {
     marginTop: '1vh',
-    maxWidth: '25vw'
+    maxWidth: '25vw',
+    "&:hover":{
+      cursor: 'pointer',
+    }
   },
   time: {
     margin: '1vh 0.5% 0 1.2%',
@@ -138,18 +141,7 @@ const Messages = (props) => {
               })
             }
           </div>
-          <div style={{ height: 'fit-content' }}>
-            {chosenFiles.length !== 0 ? (
-              <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'lightblue' }}>
-                {chosenFiles.map(chosenFile => {
-                  return (
-                    <div key={chosenFile.name}>{chosenFile.name}</div>
-                  )
-                })}
-              </div>
-            ) : null
-            }
-          </div>
+          
 
           <div ref={messagesEndRef} />
 

@@ -10,6 +10,7 @@ import Popover from '@material-ui/core/Popover'
 import SendIcon from '@material-ui/icons/Send'
 import EmojiEmotionsOutlinedIcon from '@material-ui/icons/EmojiEmotionsOutlined'
 import ImageIcon from '@material-ui/icons/Image'
+import CloseIcon from '@material-ui/icons/Close'
 import { useSelector, useDispatch } from 'react-redux'
 import { MESSAGE_SENT, TYPING, SEND_CHOSEN_FILES } from '../Events'
 import { setChosenFiles } from '../actions/messageActions'
@@ -41,6 +42,8 @@ const MessageInput = (props) => {
   const dispatch = useDispatch()
   const fileRef = React.useRef(null)
 
+
+
   var sendMessage = (chatId, message, isNotification) => {
     socket.emit(MESSAGE_SENT, { chatId, message, isNotification })
   }
@@ -71,9 +74,11 @@ const MessageInput = (props) => {
     console.log('e: ', chosenFilesTemp)
     for (var i = 0; i < chosenFilesTemp[0].length; i++) {
       chosenFilesArray.push(chosenFilesTemp[0][i])
+      
+     
     }
-    console.log('chosen files array: ', chosenFilesArray)
     dispatch(setChosenFiles(chosenFilesArray))
+
 
   }
 
@@ -115,7 +120,7 @@ const MessageInput = (props) => {
         var fileReader = new FileReader()
         fileReader.onload = (e) => {
           var imgSrc = e.target.result
-          socket.emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, {data: imgSrc}), isNotification: false })
+          socket.emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: imgSrc }), isNotification: false })
           console.log('img src: ', imgSrc)
         }
         fileReader.readAsDataURL(chosenFile)
@@ -150,20 +155,29 @@ const MessageInput = (props) => {
     }
   }
 
-
-
-  const handleSendChosenFiles = (e) => {
-    e.preventDefault()
-    console.log('chosen files: ', chosenFiles)
-
-    // if(chosenFiles.length!==0){
-    //   socket.emit(SEND_CHOSEN_FILES, {chosenFiles: chosenFiles})
-    // }
+  const handleRemoveChosenFiles = () => {
+    dispatch(setChosenFiles([]))
   }
+
   return (
     <div className={classes.messageInputContainer}>
+      <div style={{ height: 'fit-content' }}>
+        {chosenFiles.length !== 0 ? (
+          <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'lightblue' }}>
+            {chosenFiles.map(chosenFile => {
+              return (
+                <div key={chosenFile.name}>{chosenFile.name}</div>
+              )
+            })}
+            <IconButton color="primary" size="small" style={{ width: 'fit-content', padding: 0, minWidth: 0, position: 'absolute', top: 0, right: 0 }} onClick={handleRemoveChosenFiles}>
+              <CloseIcon />
+            </IconButton>
+          </div>
+        ) : null
+        }
+      </div>
       <form className="message-input" noValidate autoComplete="off" onSubmit={handleSubmit} style={{ padding: "0 12px 12px 12px" }}>
-        <input style={{ height: 0, width: 0, visibility: 'hidden' }} id="fileInput" type="file" ref={fileRef} onChange={handleChoosingFiles} multiple />
+        <input style={{ height: 0, width: 0, visibility: 'hidden' }} id="fileInput" type="file" accept="image/*" ref={fileRef} onChange={handleChoosingFiles} multiple />
 
         <Grid container wrap="nowrap">
           <Grid item xs={1} style={{ display: 'flex' }}>
