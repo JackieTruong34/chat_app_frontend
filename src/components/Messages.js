@@ -97,10 +97,10 @@ const MessageList = () => {
                         <Avatar style={{ width: 32, height: 32, color: 'white', backgroundColor: mes.sender.representPhoto, margin: 'auto' }}>{mes.sender.name[0].toUpperCase()}</Avatar>
                       </div>
 
-                      {mes.isImage ? (
+                      {mes.image ? (
                         <div className="image-message-container">
                           <div className={classes.imageMessage} onClick={handleOpen}>
-                            <img src={"data:" + mes.type + ";base64," + mes.data} alt={mes.name} style={{ borderRadius: '1.3em', maxWidth: '25vw', maxHeight: '25vh' }} />
+                            <img src={"data:" + mes.image.type + ";base64," + mes.image.data} alt={mes.image.name} style={{ borderRadius: '1.3em', maxWidth: '25vw', maxHeight: '25vh' }} />
                           </div>
                           <Modal
                             aria-labelledby="transition-modal-title"
@@ -116,7 +116,7 @@ const MessageList = () => {
                           >
                             <Fade in={open}>
                               <div className="image-container">
-                                <img src={"data:" + mes.type + ";base64," + mes.data} alt={mes.name} style={{maxWidth: '70vw', maxHeight: '70vh'}} />
+                                <img src={"data:" + mes.image.type + ";base64," + mes.image.data} alt={mes.image.name} style={{maxWidth: '70vw', maxHeight: '70vh'}} />
 
                               </div>
                             </Fade>
