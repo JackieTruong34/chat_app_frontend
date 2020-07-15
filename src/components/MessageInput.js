@@ -11,6 +11,7 @@ import SendIcon from '@material-ui/icons/Send'
 import EmojiEmotionsOutlinedIcon from '@material-ui/icons/EmojiEmotionsOutlined'
 import ImageIcon from '@material-ui/icons/Image'
 import CloseIcon from '@material-ui/icons/Close'
+import DescriptionIcon from '@material-ui/icons/Description'
 import { useSelector, useDispatch } from 'react-redux'
 import { MESSAGE_SENT, TYPING, SEND_CHOSEN_FILES } from '../Events'
 import { setChosenFiles } from '../actions/messageActions'
@@ -76,7 +77,11 @@ const MessageInput = (props) => {
     console.log('e: ', chosenImagesTemp)
     for (var i = 0; i < chosenImagesTemp[0].length; i++) {
       chosenFilesArray.push(chosenImagesTemp[0][i])
-      chosenImagesArray.push(URL.createObjectURL(chosenImagesTemp[0][i]))
+
+      var type = chosenImagesTemp[0][i].type.split("/")[0]
+      var name = chosenImagesTemp[0][i].name
+      var extension = chosenImagesTemp[0][i].type.split("/")[1]
+      chosenImagesArray.push({ url: URL.createObjectURL(chosenImagesTemp[0][i]), type: type, name: name, extension })
 
     }
     dispatch(setChosenFiles(chosenFilesArray))
@@ -119,13 +124,41 @@ const MessageInput = (props) => {
           type: chosenFile.type,
 
         }
-        var fileReader = new FileReader()
-        fileReader.onload = (e) => {
-          var imgSrc = e.target.result
-          socket.emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: imgSrc }), isNotification: false })
-          console.log('img src: ', imgSrc)
+        if (chosenFile.type.split("/")[0] === "image") {
+          var fileReader = new FileReader()
+          fileReader.readAsDataURL(chosenFile)
+          fileReader.onload = (e) => {
+
+            var imgSrc = e.target.result // convert file data into base64string
+            socket.emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: imgSrc }), isNotification: false })
+            console.log('file reader')
+
+          }
+        } else {
+          var blob = new Blob([chosenFile], { type: chosenFile.type })
+          var objectUrl = window.URL.createObjectURL(blob)
+
+          var reader = new FileReader()
+          reader.readAsDataURL(blob)
+
+
+          reader.onload = (e) => {
+            if (navigator.appVersion.toString().indexOf('.NET') > 0) {
+              window.navigator.msSaveOrOpenBlob(blob, chosenFile.name)
+            } else {
+              var dataUrl = reader.result
+              console.log('type of blobl: ', dataUrl)
+
+              socket.binary(true).emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: objectUrl, blob: dataUrl }), isNotification: false })
+            }
+
+          }
+
         }
-        fileReader.readAsDataURL(chosenFile)
+
+
+
+
       })
     }
     dispatch(setChosenFiles([]))
@@ -166,12 +199,22 @@ const MessageInput = (props) => {
       <div style={{ height: 'fit-content' }}>
         {chosenFiles.length !== 0 ? (
           <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'white', display: 'flex' }}>
-            {chosenImages.map(chosenImage => {
+            {chosenImages.map(chosenFile => {
               return (
-                <div className="chosen-image-container" style={{ margin: 'auto 5px' }} key={chosenImage}>
-                  <div style={{ backgroundImage: `url(${chosenImage})`, backgroundRepeat: 'no-repeat', height: 108, width: 108, backgroundSize: 'cover', borderRadius: 18 }}>
 
-                  </div>
+                <div className="chosen-file-container" style={{ margin: 'auto 5px' }} key={chosenFile.url}>
+                  {chosenFile.type === "image" ? (<div className="chosen-image" style={{ backgroundImage: `url(${chosenFile.url})`, backgroundRepeat: 'no-repeat', height: 108, width: 108, backgroundSize: 'cover', borderRadius: 18 }}>
+
+                  </div>) : (<div className="chosen-file" style={{ width: 240, height: 60, borderRadius: 18, border: '1px solid rgba(0, 0, 0, 0.15)', display: 'flex', overflow: 'hidden' }}>
+                    <div className="illustrative-img" style={{ width: 60, backgroundColor: '#0084FF', display: 'flex' }}>
+                      <DescriptionIcon style={{ color: 'white', margin: 'auto', fontSize: 44 }} />
+                    </div>
+                    <div className="file-info" style={{ flexGrow: 1, textAlign: 'left', marginLeft: 5 }}>
+                      <div className="file-extension" style={{ fontWeight: 'bolder', paddingTop: 12 }}>{chosenFile.extension.toUpperCase()}</div>
+                      <div className="file-name">{chosenFile.name}</div>
+                    </div>
+                  </div>)}
+
 
                 </div>
               )
@@ -184,7 +227,7 @@ const MessageInput = (props) => {
         }
       </div>
       <form className="message-input" noValidate autoComplete="off" onSubmit={handleSubmit} style={{ padding: "0 12px 12px 12px" }}>
-        <input style={{ height: 0, width: 0, visibility: 'hidden' }} id="fileInput" type="file" accept="image/*" ref={fileRef} onChange={handleChoosingFiles} multiple />
+        <input style={{ height: 0, width: 0, visibility: 'hidden' }} id="fileInput" type="file" ref={fileRef} onChange={handleChoosingFiles} multiple />
 
         <Grid container wrap="nowrap">
           <Grid item xs={1} style={{ display: 'flex' }}>

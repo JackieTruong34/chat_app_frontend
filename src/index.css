@@ -34,9 +34,17 @@
     overflow-wrap: break-word;
 }
 
+.message-container .message a{
+  color: black
+}
+
 .message-container.right .message{
     background-color: #0099FF;
     color: white;
+}
+
+.message-container.right .message a{
+  color: white;
 }
 
   /* css for typing indicator */
