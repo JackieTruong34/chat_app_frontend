@@ -74,7 +74,6 @@ const MessageInput = (props) => {
   const handleChoosingFiles = (e) => {
     e.preventDefault()
     chosenImagesTemp.push(e.target.files)
-    console.log('e: ', chosenImagesTemp)
     for (var i = 0; i < chosenImagesTemp[0].length; i++) {
       chosenFilesArray.push(chosenImagesTemp[0][i])
 
@@ -147,7 +146,6 @@ const MessageInput = (props) => {
               window.navigator.msSaveOrOpenBlob(blob, chosenFile.name)
             } else {
               var dataUrl = reader.result
-              console.log('type of blobl: ', dataUrl)
 
               socket.binary(true).emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: objectUrl, blob: dataUrl }), isNotification: false })
             }

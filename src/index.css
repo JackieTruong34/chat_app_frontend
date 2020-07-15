@@ -23,7 +23,7 @@
 .message-container{
     display: flex;
     justify-content: flex-start;
-    padding: 0 1vw;
+    padding: 3px 12px;
 }
 
 .message-container.right {

@@ -83,7 +83,6 @@ const ChatContainer = () => {
 
   var receiveMessage = (chatId) => {
     return ({ message }) => {
-      console.log('message: ', message)
       var newChats = store.getState().chatReducer.chats.map((chat) => {
         // only append messages array of an active chat
         if (chat._id === chatId) {

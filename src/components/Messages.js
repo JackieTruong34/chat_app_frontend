@@ -8,11 +8,13 @@ import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import GetAppIcon from '@material-ui/icons/GetApp'
 import Grid from '@material-ui/core/Grid'
+import IconButton from '@material-ui/core/IconButton'
+import CloseIcon from '@material-ui/icons/Close'
 
 const useStyles = makeStyles((theme) => ({
   message: {
     backgroundColor: '#F1F0F0',
-    borderRadius: '1.3em',
+    borderRadius: '1.4em',
     width: 'fit-content',
     height: 'fit-content',
     padding: '0.01vh 1vw',
@@ -69,14 +71,18 @@ const TypingIndicator = (props) => {
 const MessageList = () => {
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const user = useSelector(state => state.userReducer.user)
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState({})
   const classes = useStyles()
-  const handleOpen = () => {
-    setOpen(true)
+  const handleOpen = (index) => {
+    setOpen((prevState) => ({
+      ...prevState, [index]: true
+    }))
   }
 
-  const handleClose = () => {
-    setOpen(false)
+  const handleClose = (index) => {
+    setOpen((prevState) => ({
+      ...prevState, [index]: false
+    }))
   }
 
   const convertBase64ToBlob = (base64, contentType) => {
@@ -113,31 +119,35 @@ const MessageList = () => {
                       </div>
 
                       {mes.file ? (
-                        <div className="file-container" style={{display: 'flex'}}>
+                        <div className="file-container" style={{ display: 'flex' }}>
                           {mes.file.type.split("/")[0] === "image" ? (
                             <div className="image-message-container">
-                              <div className={classes.imageMessage} onClick={handleOpen}>
+                              <div className={classes.imageMessage} onClick={() => { handleOpen(index) }}>
                                 <img src={"data:" + mes.file.type + ";base64," + mes.file.data} alt={mes.file.name} style={{ borderRadius: '1.3em', maxWidth: '25vw', maxHeight: '25vh', border: '1px solid lightgrey' }} />
                               </div>
-                              <Modal
-                                aria-labelledby="transition-modal-title"
-                                aria-describedby="transition-modal-description"
-                                className={classes.modal}
-                                open={open}
-                                onClose={handleClose}
-                                closeAfterTransition
-                                BackdropComponent={Backdrop}
-                                BackdropProps={{
-                                  timeout: 500,
-                                }}
-                              >
-                                <Fade in={open}>
-                                  <div className="image-container">
-                                    <img src={"data:" + mes.file.type + ";base64," + mes.file.data} alt={mes.file.name} style={{ maxWidth: '70vw', maxHeight: '70vh' }} />
+                              {open[index] &&
+                                <Modal
+                                  aria-labelledby="transition-modal-title"
+                                  aria-describedby="transition-modal-description"
+                                  className={classes.modal}
+                                  open={open[index]}
+                                  closeAfterTransition
+                                  BackdropComponent={Backdrop}
+                                  BackdropProps={{
+                                    timeout: 500,
+                                  }}
+                                >
+                                  <Fade in={open[index]}>
+                                    <div className="image-container">
+                                      <img src={"data:" + mes.file.type + ";base64," + mes.file.data} alt={mes.file.name} style={{ maxWidth: '70vw', maxHeight: '70vh' }} />
+                                      <IconButton style={{ width: 'fit-content', padding: 0, minWidth: 0, position: 'absolute', top: 0, right: 0 }} onClick={()=>{handleClose(index)}}>
+                                        <CloseIcon style={{color: 'white', fontSize: 40}}/>
+                                      </IconButton>
+                                    </div>
+                                  </Fade>
+                                </Modal>
+                              }
 
-                                  </div>
-                                </Fade>
-                              </Modal>
                             </div>
                           ) : (
                               <div className={`message ${classes.message}`}>
@@ -145,12 +155,12 @@ const MessageList = () => {
                                   window.navigator.msSaveOrOpenBlob(convertBase64ToBlob(mes.file.blob, mes.file.type), mes.file.name)
 
                                 ) : (
-                                    <Grid container style={{margin: '0.7vh 0.5vw'}}>
-                                      <Grid item xs={1} style={{display: 'flex'}}>
-                                        <GetAppIcon style={{fontSize: 16, color: `${mes.sender.name === user.name? 'white': 'black'}`, margin: 'auto'}}/>
+                                    <Grid container style={{ margin: '6px 0px', width: 'fit-content' }} spacing={2}>
+                                      <Grid item xs={2} md={1} style={{ display: 'flex', padding: 7 }}>
+                                        <GetAppIcon style={{ fontSize: 16, color: `${mes.sender.name === user.name ? 'white' : 'black'}`, margin: 'auto' }} />
                                       </Grid>
-                                      <Grid item xs style={{display: 'flex'}}>
-                                        <a href={mes.file.blob} target="_self" download={mes.file.name} style={{ textDecoration: 'none', margin: 'auto'}}>{mes.file.name}</a>
+                                      <Grid item xs style={{ display: 'flex' }}>
+                                        <a href={mes.file.blob} target="_self" download={mes.file.name} style={{ textDecoration: 'none', margin: 'auto' }}>{mes.file.name}</a>
                                       </Grid>
 
                                     </Grid>
@@ -167,7 +177,7 @@ const MessageList = () => {
                       ) : (<div className={`message ${classes.message}`}>
                         <p>{mes.message}</p>
                       </div>)}
-                      <div className="time" style={{display: 'flex', marginLeft: 10}}><p style={{ fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', margin: 'auto'}}>{getTime(new Date(mes.time))}</p></div>
+                      <div className="time" style={{ display: 'flex', marginLeft: 10 }}><p style={{ fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', margin: 'auto' }}>{getTime(new Date(mes.time))}</p></div>
                     </div>
                   )}
               </div>
