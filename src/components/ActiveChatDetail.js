@@ -3,6 +3,10 @@ import { makeStyles } from '@material-ui/core/styles'
 import Avatar from '@material-ui/core/Avatar'
 import AvatarGroup from '@material-ui/lab/AvatarGroup'
 import Tooltip from '@material-ui/core/Tooltip'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
 
 import { useSelector } from 'react-redux'
 import { USERS_IN_CHAT } from '../Events'
@@ -22,15 +26,15 @@ const ActiveChatDetail = () => {
   const socket = useSelector(state => state.socketReducer.socket)
 
   const [usersInChat, setUsersInChat] = useState([])
-  React.useEffect(()=>{
+  React.useEffect(() => {
     socket.on(USERS_IN_CHAT, ({ usersInChat }) => {
       setUsersInChat(usersInChat)
     })
-    return()=>{
+    return () => {
       socket.off(USERS_IN_CHAT) // prevent getting memory leak in react hook
     }
   }, [])
-  
+
 
   return (
     <div className={classes.root}>
@@ -42,19 +46,26 @@ const ActiveChatDetail = () => {
           </div>
           <div className="active-chat-detail-member">
             <h4 style={{ textAlign: 'left' }}>People: </h4>
+
             {usersInChat ? (
-              <AvatarGroup max={4}>
+              <List className="user-list-container" style={{ maxHeight: 300, overflow: 'auto', position: 'relative' }}>
                 {usersInChat.map(user => {
                   return (
-                    <Tooltip key={user._id} title={user.name} placement="bottom">
-                      <Avatar style={{backgroundColor: user.representPhoto}}>{user.name[0].toUpperCase()}</Avatar>
+                    <ListItem key={user._id}>
+                      <ListItemIcon>
+                        <Avatar style={{ backgroundColor: user.representPhoto }}>{user.name[0].toUpperCase()}</Avatar>
 
-                    </Tooltip>
+                      </ListItemIcon>
+                      <ListItemText>{user.name}</ListItemText>
+                    </ListItem>
+
                   )
                 })}
-              </AvatarGroup>
+              </List>
 
             ) : null}
+
+
           </div>
         </div>
       ) : null}

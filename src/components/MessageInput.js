@@ -76,12 +76,17 @@ const MessageInput = (props) => {
     chosenImagesTemp.push(e.target.files)
     for (var i = 0; i < chosenImagesTemp[0].length; i++) {
       chosenFilesArray.push(chosenImagesTemp[0][i])
-
-      var type = chosenImagesTemp[0][i].type.split("/")[0]
-      var name = chosenImagesTemp[0][i].name
-      var extension = chosenImagesTemp[0][i].type.split("/")[1]
-      chosenImagesArray.push({ url: URL.createObjectURL(chosenImagesTemp[0][i]), type: type, name: name, extension })
-
+      if(chosenImagesTemp[0][i].size < 2097152){
+        var type = chosenImagesTemp[0][i].type.split("/")[0]
+        var name = chosenImagesTemp[0][i].name
+        var extension = chosenImagesTemp[0][i].type.split("/")[1]
+        chosenImagesArray.push({ url: URL.createObjectURL(chosenImagesTemp[0][i]), type: type, name: name, extension })
+  
+      } else {
+        window.alert("Chosen file size exceeds 2 MB")
+        return
+      }
+     
     }
     dispatch(setChosenFiles(chosenFilesArray))
     setChosenImages(chosenImagesArray)
@@ -134,23 +139,28 @@ const MessageInput = (props) => {
 
           }
         } else {
-          var blob = new Blob([chosenFile], { type: chosenFile.type })
-          var objectUrl = window.URL.createObjectURL(blob)
+          if (chosenFile.size / 1024 / 1024 < 3) {
+            var blob = new Blob([chosenFile], { type: chosenFile.type })
+            var objectUrl = window.URL.createObjectURL(blob)
 
-          var reader = new FileReader()
-          reader.readAsDataURL(blob)
+            var reader = new FileReader()
+            reader.readAsDataURL(blob)
 
 
-          reader.onload = (e) => {
-            if (navigator.appVersion.toString().indexOf('.NET') > 0) {
-              window.navigator.msSaveOrOpenBlob(blob, chosenFile.name)
-            } else {
-              var dataUrl = reader.result
+            reader.onload = (e) => {
+              if (navigator.appVersion.toString().indexOf('.NET') > 0) {
+                window.navigator.msSaveOrOpenBlob(blob, chosenFile.name)
+              } else {
+                var dataUrl = reader.result
 
-              socket.binary(true).emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: objectUrl, blob: dataUrl }), isNotification: false })
+                socket.binary(true).emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: objectUrl, blob: dataUrl }), isNotification: false })
+              }
+
             }
-
+          } else {
+            window.alert("Chosen file size exceeds 2 MB")
           }
+
 
         }
 

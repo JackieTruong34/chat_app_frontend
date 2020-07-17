@@ -223,7 +223,7 @@ const ChatHeading = () => {
             <form type="text" onSubmit={handleChangeChatName} style={{ display: 'flex' }}>
               {/* <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}></div> */}
               <Input style={{ width: '200px' }} value={chatNameRef.current} disableUnderline={true} onChange={handleChange} inputProps={{ style: { fontWeight: 'bold', fontSize: '18.72px' } }} />
-              {chatName ? (<Button type="submit">Change</Button>) : null}
+              {/* {chatName ? (<Button type="submit">Change</Button>) : null} */}
             </form>
           </Grid>
           {/* <Grid item xs><h2 style={{ margin: 0, padding: 0 }}>{store.getState().chatReducer.activeChat.name}</h2></Grid> */}

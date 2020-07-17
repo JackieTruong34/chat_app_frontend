@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { makeStyles, fade } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 // icons
@@ -21,6 +21,11 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Button from '@material-ui/core/Button'
 import { getTime } from '../Factories'
 import Avatar from '@material-ui/core/Avatar'
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 // import socket events
 import { PRIVATE_CHAT, LOGOUT, DELETE_CHAT, LEAVE_GROUP } from '../Events'
@@ -107,7 +112,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
     maxWidth: '12vw',
   },
-  userProfile:{
+  userProfile: {
     // "&.MuiIconButton-colorPrimary": {backgroundColor: userProfileColor},
     "&:hover": {
       cursor: 'pointer'
@@ -170,7 +175,7 @@ const SidebarHeader = (props) => {
     socket.emit(LOGOUT)
   }
 
-  if(user){
+  if (user) {
     userProfileColor = user.representPhoto
   }
 
@@ -180,7 +185,7 @@ const SidebarHeader = (props) => {
         <Grid item xs>
           <Tooltip title="User account" placement="bottom-end">
             <Avatar className={classes.userProfile} onClick={handleOpenMenu} style={{ width: 40, height: 40, color: 'white', backgroundColor: user.representPhoto, margin: 5 }}>{user.name[0].toUpperCase()}</Avatar>
-            
+
             {/* <IconButton size="medium" onClick={handleOpenMenu} className={classes.userProfile}>
               {JSON.stringify(user) !== '{}' ? user.name[0].toUpperCase() : "Unknown"[0].toUpperCase()}
             </IconButton> */}
@@ -247,7 +252,7 @@ const SidebarHeader = (props) => {
                           <Button size="small" color="secondary" onClick={() => { handleCloseModal(); setReceivers([]) }}>Cancel</Button>
                         </Grid>
                         <Grid item xs>
-                          <div className="add-user-title" style={{ fontWeight: 'bold'}}>To</div>
+                          <div className="add-user-title" style={{ fontWeight: 'bold' }}>To</div>
                         </Grid>
                         <Grid item xs={2}>
                           <Button size="small" color="primary" onClick={() => { handleCreateNewChat(receivers); handleCloseMenu(); setReceivers([]) }}>Done</Button>
@@ -334,6 +339,12 @@ const SidebarSearch = (props) => {
   )
 }
 
+const DeleteConfirmationDialog = (props) => {
+  
+
+ 
+}
+
 const ChatList = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
@@ -345,6 +356,8 @@ const ChatList = () => {
   const [isHovered, setIsHovered] = useState({}) // set hover by index of a div
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [isMenuOpened, setIsMenuOpened] = useState({})
+  const [isDialogOpen, setIsOpenDialog] = React.useState(false);
+
 
   const handleMouseEnter = (index) => {
     setIsHovered((prevState) => ({
@@ -371,12 +384,25 @@ const ChatList = () => {
 
   };
 
+  
+  const handleOpenDialog = (index) => {
+    setIsOpenDialog((prevState) => ({
+      ...prevState, [index]: true
+    }))
+  };
+
+  const handleCloseDialog = (index) => {
+    setIsOpenDialog((prevState) => ({
+      ...prevState, [index]: false
+    }))
+  };
+
   const handleDeleteChat = () => {
     socket.emit(DELETE_CHAT, { chatId: activeChat._id })
   }
 
-  const handleLeaveGroup = ()=>{
-    socket.emit(LEAVE_GROUP, {sender: user, chat: activeChat})
+  const handleLeaveGroup = () => {
+    socket.emit(LEAVE_GROUP, { sender: user, chat: activeChat })
   }
 
 
@@ -384,11 +410,11 @@ const ChatList = () => {
     <div className="active-chat" style={{ marginTop: '2vh' }}>
       {chats.map((chat, index) => {
         if (chat.name) {
-          
-          const lastMess = chat.messages.filter(mes=>{
+
+          const lastMess = chat.messages.filter(mes => {
             return mes.isNotification !== true
           })
-          const lastMessage = lastMess[lastMess.length-1];
+          const lastMessage = lastMess[lastMess.length - 1];
           return (
             <div
               className={classes.chats}
@@ -424,7 +450,31 @@ const ChatList = () => {
                       <Menu id="option-menu" anchorEl={anchorEl} keepMounted open={isMenuOpened[index] ? (isMenuOpened[index]) : (false)} onClose={() => handleCloseMenu(index)}>
                         {chat.users.length > 2 ? (<MenuItem onClick={() => { handleCloseMenu(index); handleLeaveGroup() }}>Leave Group</MenuItem>) : null}
 
-                        <MenuItem onClick={() => { handleCloseMenu(index); handleDeleteChat() }}>Delete</MenuItem>
+                        <MenuItem onClick={() => { handleCloseMenu(index); handleOpenDialog(index) }}>
+                          Delete
+                          
+                        </MenuItem>
+                        <Dialog
+                            open={isDialogOpen[index]? isDialogOpen[index]: false}
+                            onClose={()=>handleCloseDialog(index)}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                          >
+                            <DialogTitle id="alert-dialog-title">{"Delete Conversation"}</DialogTitle>
+                            <DialogContent>
+                              <DialogContentText id="alert-dialog-description">
+                                This will permanently delete the conversation history.
+                            </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                              <Button onClick={() => handleCloseDialog(index)} color="primary">
+                                Cancel
+                              </Button>
+                              <Button onClick={() => {handleCloseDialog(index); handleDeleteChat()}} color="primary" autoFocus>
+                                Delete
+                              </Button>
+                            </DialogActions>
+                          </Dialog>
                       </Menu>
                     </div>
                   }
