@@ -12,7 +12,7 @@ import EmojiEmotionsOutlinedIcon from '@material-ui/icons/EmojiEmotionsOutlined'
 import ImageIcon from '@material-ui/icons/Image'
 import CloseIcon from '@material-ui/icons/Close'
 import DescriptionIcon from '@material-ui/icons/Description'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, useStore } from 'react-redux'
 import { MESSAGE_SENT, TYPING, SEND_CHOSEN_FILES } from '../Events'
 import { setChosenFiles } from '../actions/messageActions'
 
@@ -39,8 +39,7 @@ const MessageInput = (props) => {
 
   const socket = useSelector(state => state.socketReducer.socket)
   const activeChat = useSelector(state => state.chatReducer.activeChat)
-  const chosenFiles = useSelector(state => state.messageReducer.chosenFiles)
-
+  const store = useStore()
   const dispatch = useDispatch()
   const fileRef = React.useRef(null)
 
@@ -73,21 +72,28 @@ const MessageInput = (props) => {
 
   const handleChoosingFiles = (e) => {
     e.preventDefault()
-    chosenImagesTemp.push(e.target.files)
-    for (var i = 0; i < chosenImagesTemp[0].length; i++) {
-      chosenFilesArray.push(chosenImagesTemp[0][i])
-      if(chosenImagesTemp[0][i].size < 2097152){
-        var type = chosenImagesTemp[0][i].type.split("/")[0]
-        var name = chosenImagesTemp[0][i].name
-        var extension = chosenImagesTemp[0][i].type.split("/")[1]
-        chosenImagesArray.push({ url: URL.createObjectURL(chosenImagesTemp[0][i]), type: type, name: name, extension })
-  
+    // console.log('def: ', Object.values(e.target.files))
+    chosenImagesTemp = Object.values(e.target.files)
+    console.log('chosen file: ', chosenImagesTemp)
+    for (var i = 0; i < chosenImagesTemp.length; i++) {
+      if (chosenImagesTemp[i].size < 52428800) {
+        chosenFilesArray.push(chosenImagesTemp[i])
+        var type = chosenImagesTemp[i].type.split("/")[0]
+        var name = chosenImagesTemp[i].name
+        var extension = chosenImagesTemp[i].type.split("/")[1]
+        chosenImagesArray.push({ url: URL.createObjectURL(chosenImagesTemp[i]), type: type, name: name, extension })
       } else {
-        window.alert("Chosen file size exceeds 2 MB")
-        return
+        window.alert("Chosen file size exceeds 50MB")
+        console.log('large file: ', chosenImagesTemp[i])
+        chosenImagesTemp = chosenImagesTemp.filter(file => {
+          console.log('abc: ', file.name);
+          return file.name !== chosenImagesTemp[i].name
+        })
+
       }
-     
     }
+    console.log('chosen file after removing large file: : ', chosenFilesArray)
+
     dispatch(setChosenFiles(chosenFilesArray))
     setChosenImages(chosenImagesArray)
 
@@ -120,8 +126,8 @@ const MessageInput = (props) => {
     }
     // sendMessage(activeChat._id, message, false)
     setMessage("")
-    if (chosenFiles) {
-      chosenFiles.map(chosenFile => {
+    if (store.getState().messageReducer.chosenFiles) {
+      store.getState().messageReducer.chosenFiles.map(chosenFile => {
         var fileObj = {
           name: chosenFile.name,
           size: chosenFile.size,
@@ -139,37 +145,27 @@ const MessageInput = (props) => {
 
           }
         } else {
-          if (chosenFile.size / 1024 / 1024 < 3) {
-            var blob = new Blob([chosenFile], { type: chosenFile.type })
-            var objectUrl = window.URL.createObjectURL(blob)
+          var blob = new Blob([chosenFile], { type: chosenFile.type })
+          var objectUrl = window.URL.createObjectURL(blob)
 
-            var reader = new FileReader()
-            reader.readAsDataURL(blob)
+          var reader = new FileReader()
+          reader.readAsDataURL(blob)
 
 
-            reader.onload = (e) => {
-              if (navigator.appVersion.toString().indexOf('.NET') > 0) {
-                window.navigator.msSaveOrOpenBlob(blob, chosenFile.name)
-              } else {
-                var dataUrl = reader.result
+          reader.onload = (e) => {
+            if (navigator.appVersion.toString().indexOf('.NET') > 0) {
+              window.navigator.msSaveOrOpenBlob(blob, chosenFile.name)
+            } else {
+              var dataUrl = reader.result
 
-                socket.binary(true).emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: objectUrl, blob: dataUrl }), isNotification: false })
-              }
-
+              socket.binary(true).emit(MESSAGE_SENT, { chatId: activeChat._id, message: Object.assign({}, fileObj, { data: objectUrl, blob: dataUrl }), isNotification: false })
             }
-          } else {
-            window.alert("Chosen file size exceeds 2 MB")
           }
-
-
         }
-
-
-
-
       })
     }
     dispatch(setChosenFiles([]))
+    setChosenImages([])
 
   }
 
@@ -201,12 +197,12 @@ const MessageInput = (props) => {
   const handleRemoveChosenFiles = () => {
     dispatch(setChosenFiles([]))
   }
-
+  console.log('chosen file abc xyz: ', store.getState().messageReducer.chosenFiles)
   return (
     <div className={classes.messageInputContainer}>
       <div style={{ height: 'fit-content' }}>
-        {chosenFiles.length !== 0 ? (
-          <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'white', display: 'flex' }}>
+        {chosenImages.length !== 0 ? (
+          <div className="chosen-files-container" style={{ borderTop: '1px solid lightgrey', height: 125, width: '100%', zIndex: 1, backgroundColor: 'white', display: 'flex', overflowX: 'scroll' }}>
             {chosenImages.map(chosenFile => {
               return (
 
@@ -271,8 +267,8 @@ const MessageInput = (props) => {
 
           </Grid>
           <Grid item xs={1} style={{ display: 'flex' }}>
-            {message || chosenFiles.length !== 0 ? (
-              <Button color="secondary" disabled={message.length < 1 && chosenFiles.length === 0} type="submit" size="small" style={{ width: 'fit-content', padding: 0, minWidth: 0, margin: 'auto' }}>
+            {message || store.getState().messageReducer.chosenFiles.length !== 0 ? (
+              <Button color="secondary" disabled={message.length < 1 && store.getState().messageReducer.chosenFiles.length === 0} type="submit" size="small" style={{ width: 'fit-content', padding: 0, minWidth: 0, margin: 'auto' }}>
                 <SendIcon style={{ fontSize: '32px', margin: 0, padding: 0, color: '#0099FF' }} />
               </Button>
             ) : (

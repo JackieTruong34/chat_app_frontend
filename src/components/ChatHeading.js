@@ -15,9 +15,11 @@ import Button from '@material-ui/core/Button'
 import Input from '@material-ui/core/Input'
 import ActiveChatDetail from './ActiveChatDetail'
 import Avatar from '@material-ui/core/Avatar'
+import VideocamIcon from '@material-ui/icons/Videocam'
+
 
 import { useSelector, useStore } from 'react-redux'
-import { ADD_USER_TO_CHAT, CHANGE_CHAT_NAME, USERS_IN_CHAT } from '../Events'
+import { ADD_USER_TO_CHAT, CHANGE_CHAT_NAME, USERS_IN_CHAT, VIDEO_CALL } from '../Events'
 
 const useStyles = makeStyles((theme) => ({
   iconBtn: {
@@ -42,6 +44,13 @@ const useStyles = makeStyles((theme) => ({
   },
   iconModalContainer: {
     width: 'fit-content'
+  },
+  paperVideo: {
+    backgroundColor: 'white',
+    borderRadius: 4,
+    padding: 10,
+    width: 600,
+    height: 800
   }
 
 }))
@@ -77,7 +86,7 @@ const AddIconModal = () => {
     if (!receivers.includes(receiver)) {
       setReceivers(receivers => [...receivers, receiver])
     } else {
-      const newReceiversArr = receiversRef.current.filter(item=>item !== receiver)
+      const newReceiversArr = receiversRef.current.filter(item => item !== receiver)
       setReceivers(newReceiversArr)
     }
   }
@@ -108,7 +117,7 @@ const AddIconModal = () => {
                   <Button onClick={() => { handleClose(); setReceivers([]); }} color="secondary" size="small" >Cancel</Button>
                 </Grid>
                 <Grid item xs style={{ margin: 'auto', height: 'fit-content' }}>
-                  <div className="add-user-title" style={{fontWeight: 'bold'}}>Add More People</div>
+                  <div className="add-user-title" style={{ fontWeight: 'bold' }}>Add More People</div>
                 </Grid>
                 {/* done button */}
                 <Grid item xs={2}>
@@ -140,11 +149,11 @@ const AddIconModal = () => {
                       // sendPrivateMessage(activeUser);
                       handleChooseReceivers(activeUser);
                     }}>
-                      <Avatar style={{width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', marginRight: 10}}>{activeUser.name[0].toUpperCase()}</Avatar>
+                      <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', marginRight: 10 }}>{activeUser.name[0].toUpperCase()}</Avatar>
                       <ListItemText primary={activeUser.name} />
                     </ListItem>
                   )
-                })) : (<div style={{color: 'rgba(0, 0, 0, 0.4)'}}>No active user</div>)
+                })) : (<div style={{ color: 'rgba(0, 0, 0, 0.4)' }}>No active user</div>)
               }
             </List>
 
@@ -193,6 +202,90 @@ const InfoIconModal = () => {
   )
 }
 
+let localStream = null
+const VideoCall = () => {
+  const classes = useStyles()
+  const { RTCPeerConnection, RTCSessionDescription } = window
+  const [open, setOpen] = React.useState(false);
+  const activeChat = useSelector(state => state.chatReducer.activeChat)
+  const socket = useSelector(state => state.socketReducer.socket)
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleOpenCam = () => {
+    setOpen(true);
+
+    navigator.getUserMedia({video: true, audio: true}, stream=>{
+      const localVideo = document.querySelector('video[id="caller"]')
+      if(localVideo){
+         localVideo.srcObject = stream;
+         localStream = stream
+         localVideo.onloadedmetadata = function(e) {
+           localVideo.play();
+         };
+         handleCallUser()
+      }
+    }, error=>{
+      window.alert(error.message)
+    })
+  }
+
+  var pc = new RTCPeerConnection({
+    iceServers: [{
+        url: "stun:stun.services.mozilla.com",
+        username: "somename",
+        credential: "somecredentials"
+    }]
+});
+
+  const handleCallUser = async ()=>{
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(new RTCSessionDescription(offer))
+    socket.emit(VIDEO_CALL, {offer: offer, to: activeChat.users})
+  }
+
+  const handleEndCall = ()=>{
+    const localVideo = document.querySelector('video[id="video-call"]')
+    localVideo.pause()
+    localVideo.src = ""
+    localStream.getTracks().map(stream=>{
+      stream.stop()
+    })
+    setOpen(false)
+  }
+  return (
+    <IconButton size="medium" className={classes.iconBtn} onClick={handleOpenCam}>
+      <VideocamIcon />
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={classes.modal}
+        open={open}
+        onClose={() => { handleClose(); }}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={open}>
+          <div className={classes.paperVideo}>
+            <video id="receivers" className="video-call"></video>
+            <video autoPlay id="caller" className="video-call" style={{width: 100, height: 100, position: 'relative', float: 'right'}}></video>
+            <Button color="secondary" onClick={()=>handleEndCall()}>End Call</Button>
+
+          </div>
+        </Fade>
+      </Modal>
+    </IconButton>
+
+  )
+}
+
 const ChatHeading = () => {
   const store = useStore()
   const activeChat = useSelector(state => state.chatReducer.activeChat)
@@ -201,10 +294,10 @@ const ChatHeading = () => {
   const chatNameRef = React.useRef()
   chatNameRef.current = chatName
 
-  useEffect(()=>{
+  useEffect(() => {
     setChatName(store.getState().chatReducer.activeChat.name)
-  },[store.getState().chatReducer.activeChat])
-  
+  }, [store.getState().chatReducer.activeChat])
+
   const handleChange = (e) => {
     setChatName(e.target.value)
   }
@@ -228,13 +321,16 @@ const ChatHeading = () => {
           </Grid>
           {/* <Grid item xs><h2 style={{ margin: 0, padding: 0 }}>{store.getState().chatReducer.activeChat.name}</h2></Grid> */}
           <Grid item xs>
-            {activeChat.name !== "Community" ? (
+            {activeChat.name ? (
               <div className="icon-modals-container" style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <AddIconModal />
                 <InfoIconModal />
+                <VideoCall />
+
               </div>
             ) : null}
           </Grid>
+         
         </Grid>
 
       </div>
