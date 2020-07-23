@@ -19,7 +19,10 @@ import VideocamIcon from '@material-ui/icons/Videocam'
 
 
 import { useSelector, useStore } from 'react-redux'
-import { ADD_USER_TO_CHAT, CHANGE_CHAT_NAME, USERS_IN_CHAT, VIDEO_CALL } from '../Events'
+import {
+  ADD_USER_TO_CHAT, CHANGE_CHAT_NAME, USERS_IN_CHAT,
+  CALL_USER, CALL_MADE, MAKE_ANSER, ANSWER_MADE
+} from '../Events'
 
 const useStyles = makeStyles((theme) => ({
   iconBtn: {
@@ -202,61 +205,170 @@ const InfoIconModal = () => {
   )
 }
 
-let localStream = null
 const VideoCall = () => {
   const classes = useStyles()
   const { RTCPeerConnection, RTCSessionDescription } = window
+
   const [open, setOpen] = React.useState(false);
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const socket = useSelector(state => state.socketReducer.socket)
-  const handleOpen = () => {
-    setOpen(true);
-  };
+  const user = useSelector(state => state.userReducer.user)
 
+  let isAlreadyCalling = false
+  let getCalled = false
+  let isNegotiating = false
+  var peerConnection1 = null
+
+  peerConnection1 = new RTCPeerConnection({
+    iceServers: [{
+      urls: 'stun:stun.l.google.com:19302',
+
+    }]
+  })
+  peerConnection1.onicecandidate = (event)=>{
+    if(!peerConnection1) return
+    if(event.candidate){
+      console.log('candidate: ', event.candidate)
+      socket.emit("candidate", { candidate: event.candidate, to: activeChat.users })
+    }
+  }
+  peerConnection1.ontrack = ({ streams: [stream] }) => {
+    const remoteVideo = document.getElementById("remote-video");
+    remoteVideo.srcObject = stream;
+    console.log('remote video: ', remoteVideo)
+    console.log('remote video src: ', remoteVideo.srcObject)
+
+  }
+  socket.on("gotCandidate", async ({candidate})=>{
+    var sdpCandidate = new RTCIceCandidate(candidate)
+    await peerConnection1.addIceCandidate(sdpCandidate).catch("error")
+  })
+ 
+
+  // call
   const handleClose = () => {
     setOpen(false);
   };
+
   const handleOpenCam = () => {
     setOpen(true);
+    handleCallUser()
+    // 2.
+    navigator.getUserMedia(
+      { 
+        video: true, // video track
+        audio: true , // audio track
+      },
+      stream => {
+        const localVideo = document.getElementById("local-video");
+        if (localVideo) {
+          localVideo.srcObject = stream
+        }
+        // 3.
+        stream.getTracks().forEach(track => {
+          peerConnection1.addTrack(track, stream)
+        });
+        console.log('stream: ', stream)
 
-    navigator.getUserMedia({video: true, audio: true}, stream=>{
-      const localVideo = document.querySelector('video[id="caller"]')
-      if(localVideo){
-         localVideo.srcObject = stream;
-         localStream = stream
-         localVideo.onloadedmetadata = function(e) {
-           localVideo.play();
-         };
-         handleCallUser()
+        console.log('peeer connect: ', peerConnection1)
+
+      },
+      error => {
+        console.warn(error.message);
       }
-    }, error=>{
-      window.alert(error.message)
-    })
+    )
   }
 
-  var pc = new RTCPeerConnection({
-    iceServers: [{
-        url: "stun:stun.services.mozilla.com",
-        username: "somename",
-        credential: "somecredentials"
-    }]
-});
+  const handleEndCall = () => {
 
-  const handleCallUser = async ()=>{
-    const offer = await pc.createOffer()
-    await pc.setLocalDescription(new RTCSessionDescription(offer))
-    socket.emit(VIDEO_CALL, {offer: offer, to: activeChat.users})
   }
 
-  const handleEndCall = ()=>{
-    const localVideo = document.querySelector('video[id="video-call"]')
-    localVideo.pause()
-    localVideo.src = ""
-    localStream.getTracks().map(stream=>{
-      stream.stop()
-    })
-    setOpen(false)
+  const handleCallUser = async () => {
+    //  1.
+    const offer = await peerConnection1.createOffer() 
+    // 2.
+    await peerConnection1.setLocalDescription(new RTCSessionDescription(offer))
+    
+    // 3.
+    socket.emit(CALL_USER, { offer: offer, to: activeChat.users })
+    console.log(1)
   }
+
+
+  socket.on(CALL_MADE, async ({ offer, receiver }) => {
+    setOpen(true)
+    // 2.
+    // const sdpOffer = await 
+    // 3.
+    await peerConnection1.setRemoteDescription(new RTCSessionDescription(offer))
+    // 4. 
+    navigator.getUserMedia(
+      { video: true, audio: true },
+      stream => {
+        const localVideo = document.getElementById("local-video");
+        if (localVideo) {
+          localVideo.srcObject = stream;
+        }
+        // 5.
+        stream.getTracks().forEach(track => peerConnection1.addTrack(track, stream));
+      },
+      error => {
+        console.warn(error.message);
+      }
+    )
+    console.log('3')
+    // 6.
+    const answer = await peerConnection1.createAnswer()
+    // 7.
+    await peerConnection1.setLocalDescription(new RTCSessionDescription(answer))
+    console.log('peer connect 2: ', peerConnection1)
+    // 8.
+    socket.emit(MAKE_ANSER, ({ answer: answer, to: receiver }))
+    getCalled = true
+  })
+
+  socket.on(ANSWER_MADE, async ({ answer, receiver }) => {
+    console.log('5')
+    // 1.
+    // const sdpAnswer = await 
+
+    // 2.
+    await peerConnection1.setRemoteDescription(new RTCSessionDescription(answer))
+    
+  })
+
+  
+
+  // peerConnection1.ontrack = function ({ streams: [stream] }) {
+  //   console.log('total: ', stream)
+  //   const remoteVideo = document.getElementById("remote-video");
+  //   if (remoteVideo) {
+  //     remoteVideo.srcObject = stream;
+  //   }
+  //   peerConnection1.addEventListener('track', async (event) => {
+  //     stream.addTrack(event.track, stream);
+  //   })
+  // }
+
+  // navigator.getUserMedia(
+  //   { video: true, audio: true },
+  //   stream => {
+  //     const localVideo = document.getElementById("local-video");
+  //     if (localVideo) {
+  //       localVideo.srcObject = stream;
+  //     }
+  //     console.log('stream 1: ', stream)
+  //     stream.getTracks().forEach(track => peerConnection1.addTrack(track, stream));
+
+  //   },
+  //   error => {
+  //     console.warn(error.message);
+  //   }
+  // )
+
+
+
+
   return (
     <IconButton size="medium" className={classes.iconBtn} onClick={handleOpenCam}>
       <VideocamIcon />
@@ -274,9 +386,9 @@ const VideoCall = () => {
       >
         <Fade in={open}>
           <div className={classes.paperVideo}>
-            <video id="receivers" className="video-call"></video>
-            <video autoPlay id="caller" className="video-call" style={{width: 100, height: 100, position: 'relative', float: 'right'}}></video>
-            <Button color="secondary" onClick={()=>handleEndCall()}>End Call</Button>
+            <video autoPlay id="remote-video" className="video-call" style={{ width: 400, height: 600 }}></video>
+            <video autoPlay muted id="local-video" className="video-call" style={{ width: 100, height: 100, position: 'relative', float: 'right' }}></video>
+            <Button color="secondary" onClick={() => handleEndCall()}>End Call</Button>
 
           </div>
         </Fade>
@@ -330,7 +442,7 @@ const ChatHeading = () => {
               </div>
             ) : null}
           </Grid>
-         
+
         </Grid>
 
       </div>

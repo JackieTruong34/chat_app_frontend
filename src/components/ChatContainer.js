@@ -3,7 +3,10 @@ import React, { useEffect } from 'react'
 import Sidebar from './Sidebar'
 import ActiveUserList from './ActiveUserList'
 import Grid from '@material-ui/core/Grid'
-import { MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER, DELETE_CHAT, CHANGE_CHAT_NAME, LEAVE_GROUP } from '../Events'
+import {
+  MESSAGE_RECEIVED, TYPING, PRIVATE_CHAT, USER_CONNECTED, USER_DISCONNECTED,
+  NEW_CHAT_USER, DELETE_CHAT, CHANGE_CHAT_NAME, LEAVE_GROUP
+} from '../Events'
 import ChatHeading from './ChatHeading'
 import Messages from './Messages'
 import MessageInput from './MessageInput'
