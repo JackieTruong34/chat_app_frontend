@@ -10,9 +10,9 @@ import { setSocket } from '../actions/socketActions' // import set socket functi
 import { setUser } from '../actions/userActions'
 // port 3001: server
 // port 3000: reactjs
-// const socketURL = "http://192.168.1.86:3001"
+const socketURL = "http://192.168.1.74:3001" //home
 // const socketURL = "http://192.168.0.56:3001"
-const socketURL = "http://localhost:3001"
+// const socketURL = "http://localhost:3001"
 const Layout = (props) => {
   const dispatch = useDispatch()
   const store = useStore()

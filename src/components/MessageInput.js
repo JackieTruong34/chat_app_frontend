@@ -196,8 +196,8 @@ const MessageInput = (props) => {
 
   const handleRemoveChosenFiles = () => {
     dispatch(setChosenFiles([]))
+    setChosenImages([])
   }
-  console.log('chosen file abc xyz: ', store.getState().messageReducer.chosenFiles)
   return (
     <div className={classes.messageInputContainer}>
       <div style={{ height: 'fit-content' }}>

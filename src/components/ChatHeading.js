@@ -152,11 +152,11 @@ const AddIconModal = () => {
                       // sendPrivateMessage(activeUser);
                       handleChooseReceivers(activeUser);
                     }}>
-                      <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', marginRight: 10 }}>{activeUser.name[0].toUpperCase()}</Avatar>
+                      <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: `${activeUser.representPhoto}`, marginRight: 10 }}>{activeUser.name[0].toUpperCase()}</Avatar>
                       <ListItemText primary={activeUser.name} />
                     </ListItem>
                   )
-                })) : (<div style={{ color: 'rgba(0, 0, 0, 0.4)' }}>No active user</div>)
+                })) : (<div style={{ color: 'rgba(0, 0, 0, 0.4)' }}>No active user at the moment!</div>)
               }
             </List>
 
@@ -213,7 +213,8 @@ const VideoCall = () => {
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const socket = useSelector(state => state.socketReducer.socket)
   const user = useSelector(state => state.userReducer.user)
-
+  // let peerConnection1 = null
+  // let peerConnection2 = null
   let peerConnection1 = new RTCPeerConnection({
     iceServers: [{
       urls: 'stun:stun.l.google.com:19302',
@@ -221,21 +222,28 @@ const VideoCall = () => {
     }]
   })
 
-  let peerConnection2 = new RTCPeerConnection({
+  let peerConnection2 =  new RTCPeerConnection({
     iceServers: [{
       urls: 'stun:stun.l.google.com:19302',
 
     }]
   })
 
-  peerConnection1.ontrack = (event) => {
-    let remoteVideo = document.getElementById("remote-video");
-    remoteVideo.srcObject = event.streams[0]
+
+  if (peerConnection1) {
+    peerConnection1.ontrack = (event) => {
+      let remoteVideo = document.getElementById("remote-video");
+      remoteVideo.srcObject = event.streams[0]
+    }
   }
-  peerConnection2.ontrack = (event) => {
-    let remoteVideo = document.getElementById("remote-video")
-    remoteVideo.srcObject = event.streams[0]
+  if (peerConnection2) {
+    peerConnection2.ontrack = (event) => {
+      let remoteVideo = document.getElementById("remote-video")
+      remoteVideo.srcObject = event.streams[0]
+    }
   }
+
+
 
   // call
   const handleClose = () => {
@@ -244,112 +252,168 @@ const VideoCall = () => {
 
   const handleOpenCam = () => {
     setOpen(true);
+
     handleCallUser()
 
   }
 
-  const handleEndCall = () => {
-    
-  }
+
 
   const handleCallUser = async () => {
-    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    if (peerConnection1) {
+      let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      if (peerConnection1.signalingState !== "closed" && stream) {
+        const localVideo = document.getElementById("local-video");
+        localVideo.srcObject = stream
 
-    const localVideo = document.getElementById("local-video");
-    localVideo.srcObject = stream
+        let localStream = stream
+        stream.getTracks().forEach(async track => await peerConnection1.addTrack(track, localStream))
 
-    let localStream = stream
-    stream.getTracks().forEach(async track => await peerConnection1.addTrack(track, localStream))
-
-    peerConnection1.onnegotiationneeded = async () => {
-      let offer = await peerConnection1.createOffer()
-      await peerConnection1.setLocalDescription(offer)
-      socket.emit(CALL_USER, { offer: offer, to: activeChat.users })
-      peerConnection1.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.emit("candidate", { candidate: event.candidate, to: activeChat.users, pc: "pc1" })
+        peerConnection1.onnegotiationneeded = async () => {
+          let offer = await peerConnection1.createOffer()
+          await peerConnection1.setLocalDescription(offer)
+          socket.emit(CALL_USER, { offer: offer, to: activeChat.users })
+          peerConnection1.onicecandidate = (event) => {
+            if (event.candidate) {
+              socket.emit("candidate", { candidate: event.candidate, to: activeChat.users, pc: "pc1" })
+            }
+          }
         }
+
+
+        console.log('peer 1: ', peerConnection1)
+
       }
     }
 
-
-    console.log('peer 1: ', peerConnection1)
 
   }
 
 
   socket.on(CALL_MADE, async ({ offer, receiver }) => {
     setOpen(true)
+    if (peerConnection2) {
+      if (peerConnection2.signalingState !== "closed") {
+        var sdpOffer = new RTCSessionDescription(offer)
+        await peerConnection2.setRemoteDescription(sdpOffer)
 
-    var sdpOffer = new RTCSessionDescription(offer)
-    await peerConnection2.setRemoteDescription(sdpOffer)
+        let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        if (stream) {
+          const localVideo = document.getElementById("local-video")
+          localVideo.srcObject = stream
 
-    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          let localStream = stream
+          stream.getTracks().forEach(async track => await peerConnection2.addTrack(track, localStream))
 
-    const localVideo = document.getElementById("local-video");
-    localVideo.srcObject = stream
+          let answer = await peerConnection2.createAnswer()
+          await peerConnection2.setLocalDescription(answer)
 
-    let localStream = stream
-    stream.getTracks().forEach(async track => await peerConnection2.addTrack(track, localStream))
-
-    let answer = await peerConnection2.createAnswer()
-    await peerConnection2.setLocalDescription(answer)
-
-    socket.emit(MAKE_ANSER, ({ answer: answer, to: receiver }))
+          socket.emit(MAKE_ANSER, ({ answer: answer, to: receiver }))
 
 
-    peerConnection2.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit("candidate", { candidate: event.candidate, to: activeChat.users, pc: "pc2" })
+          peerConnection2.onicecandidate = (event) => {
+            if (event.candidate) {
+              socket.emit("candidate", { candidate: event.candidate, to: activeChat.users, pc: "pc2" })
+            }
+          }
+          console.log('peer 2: ', peerConnection2)
+        }
       }
     }
-    console.log('peer 2: ', peerConnection2)
 
   })
 
   socket.on(ANSWER_MADE, async ({ answer, receiver }) => {
-    if (peerConnection1.signalingState == "stable") {
-      console.log("negotiating")
-      return
-    }
-    await peerConnection1.setRemoteDescription(new RTCSessionDescription(answer))
+    if (peerConnection1) {
+      if (peerConnection1.signalingState == "stable") {
+        console.log("negotiating")
+        return
+      }
+      if (peerConnection1.signalingState !== "closed") {
+        await peerConnection1.setRemoteDescription(new RTCSessionDescription(answer))
 
-    if (candidatesArray.length) {
-      candidatesArray.forEach(async candidate => {
-        var sdpCandidate = new RTCIceCandidate(candidate)
-        await peerConnection1.addIceCandidate(sdpCandidate)
-      })
+      }
+
+      if (candidatesArray.length) {
+        candidatesArray.forEach(async candidate => {
+          var sdpCandidate = new RTCIceCandidate(candidate)
+          await peerConnection1.addIceCandidate(sdpCandidate)
+        })
+      }
     }
+
 
   })
 
   let candidatesArray = []
   socket.on("gotCandidate", async ({ candidate, pc }) => {
     if (pc == "pc1") {
-      try {
-        if (peerConnection2.signalingState != "stable" && !peerConnection2.remoteDescription) {
-          candidatesArray.push(candidate)
-          return
+      if (peerConnection2) {
+        try {
+          if (peerConnection2.signalingState != "stable" && !peerConnection2.remoteDescription) {
+            candidatesArray.push(candidate)
+            return
+          }
+          var sdpCandidate = new RTCIceCandidate(candidate)
+          await peerConnection2.addIceCandidate(sdpCandidate)
+        } catch (error) {
+          console.log("error while adding ice candidate on peer 2: ", error)
         }
-        var sdpCandidate = new RTCIceCandidate(candidate)
-        await peerConnection2.addIceCandidate(sdpCandidate)
-      } catch (error) {
-        console.log("error while adding ice candidate on peer 2: ", error)
       }
+
 
     }
     if (pc == "pc2") {
-      try {
-        if (peerConnection1.signalingState != "stable" && !peerConnection1.remoteDescription) {
-          candidatesArray.push(candidate)
-          return
+      if (peerConnection1) {
+        try {
+          if (peerConnection1.signalingState != "stable" && !peerConnection1.remoteDescription) {
+            candidatesArray.push(candidate)
+            return
+          }
+          var sdpCandidate = new RTCIceCandidate(candidate)
+          await peerConnection1.addIceCandidate(sdpCandidate)
+        } catch (error) {
+          console.log("error while adding ice candidate on peer 1: ", error)
         }
-        var sdpCandidate = new RTCIceCandidate(candidate)
-        await peerConnection1.addIceCandidate(sdpCandidate)
-      } catch (error) {
-        console.log("error while adding ice candidate on peer 1: ", error)
       }
+
     }
+  })
+
+  const handleEndCall = () => {
+    socket.emit("endCall", ({ users: activeChat.users }))
+  }
+
+  socket.on("closeVideoCall", () => {
+    const localVideo = document.getElementById("local-video")
+    const remoteVideo = document.getElementById("remote-video")
+
+    if (peerConnection1) {
+      peerConnection1.ontrack = null
+      peerConnection1.onicecandidate = null
+      peerConnection1.onsignalingstatechange = null
+      peerConnection1.close()
+
+    }
+    if (peerConnection2) {
+      peerConnection2.ontrack = null
+      peerConnection2.onicecandidate = null
+      peerConnection2.onsignalingstatechange = null
+      peerConnection2.close()
+
+    }
+
+    if (remoteVideo.srcObject) {
+      remoteVideo.srcObject.getTracks().forEach(track => { track.stop() })
+      remoteVideo.srcObject = null
+    }
+    if (localVideo.srcObject) {
+      localVideo.srcObject.getTracks().forEach(track => track.stop())
+      localVideo.srcObject = null
+
+    }
+
+    setOpen(false)
   })
 
   return (

@@ -282,7 +282,7 @@ const SidebarHeader = (props) => {
                               // sendPrivateMessage(activeUser);
                               handleChooseReceivers(activeUser);
                             }}>
-                              <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: 'lightgrey', marginRight: 10 }}>{activeUser.name[0].toUpperCase()}</Avatar>
+                              <Avatar style={{ width: 40, height: 40, color: 'white', backgroundColor: `${activeUser.representPhoto}`, marginRight: 10 }}>{activeUser.name[0].toUpperCase()}</Avatar>
                               <ListItemText primary={activeUser.name} />
                             </ListItem>
                           )
@@ -337,12 +337,6 @@ const SidebarSearch = (props) => {
 
     </div>
   )
-}
-
-const DeleteConfirmationDialog = (props) => {
-  
-
- 
 }
 
 const ChatList = () => {
@@ -415,6 +409,7 @@ const ChatList = () => {
             return mes.isNotification !== true
           })
           const lastMessage = lastMess[lastMess.length - 1];
+          console.log('mess: ', chat.messages)
           return (
             <div
               className={classes.chats}
@@ -433,7 +428,7 @@ const ChatList = () => {
                   <div className={`chat-name ${classes.chatName}`} style={chat.hasNewMessages ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>{chat.name}</div>
                   <Grid container space={3} style={{ color: 'rgba(153, 153, 153, 1)', fontSize: 'small' }}>
                     <Grid item xs={10} lg >
-                      <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? lastMessage.message : 'No messages!'}</div>
+                      <div className="chat-last-message" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{lastMessage !== undefined ? (lastMessage.sender.name+": "+lastMessage.message) : 'No messages!'}</div>
                     </Grid>
                     <Grid item xs={2}>
                       <div className="chat-time" style={{ textAlign: 'right' }}>{lastMessage ? getTime(new Date(lastMessage.time)) : null}</div>

@@ -7,9 +7,10 @@
 }
 
 .thread-container .thread{
-    position: relative;
+    position: absolute;
     width: 100%;
     min-height: 86vh;
+    padding-bottom: 5vh;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;

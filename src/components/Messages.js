@@ -51,6 +51,10 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
 
   },
+  backdropStyle: {
+    background: 'rgba(0,0,0,0.9)'
+  }
+
 }))
 
 const TypingIndicator = (props) => {
@@ -72,6 +76,7 @@ const MessageList = () => {
   const activeChat = useSelector(state => state.chatReducer.activeChat)
   const user = useSelector(state => state.userReducer.user)
   const [open, setOpen] = React.useState({})
+  const store = useStore()
   const classes = useStyles()
   const handleOpen = (index) => {
     setOpen((prevState) => ({
@@ -115,7 +120,7 @@ const MessageList = () => {
                   ) : (
                     <div className={`message-container ${mes.sender.name === user.name && "right"}`}>
                       <div className={`icon ${mes.sender.name === user.name ? `${classes.hidden}` : `${classes.show}`}`}>
-                        <Avatar style={{ width: 32, height: 32, color: 'white', backgroundColor: mes.sender.representPhoto, margin: 'auto' }}>{mes.sender.name[0].toUpperCase()}</Avatar>
+                        <Avatar style={{ width: 30, height: 30, color: 'white', backgroundColor: mes.sender.representPhoto, margin: 'auto' }}>{mes.sender.name[0].toUpperCase()}</Avatar>
                       </div>
 
                       {mes.file ? (
@@ -135,13 +140,18 @@ const MessageList = () => {
                                   BackdropComponent={Backdrop}
                                   BackdropProps={{
                                     timeout: 500,
+                                    classes: {
+                                      root: classes.backdropStyle
+                                    }
+
+                                    // backgroundImage: "url('data:"+mes.file.type+";base64,"+mes.file.data+"')"
                                   }}
                                 >
                                   <Fade in={open[index]}>
                                     <div className="image-container">
                                       <img src={"data:" + mes.file.type + ";base64," + mes.file.data} alt={mes.file.name} style={{ maxWidth: '70vw', maxHeight: '70vh' }} />
-                                      <IconButton style={{ width: 'fit-content', padding: 0, minWidth: 0, position: 'absolute', top: 0, right: 0 }} onClick={()=>{handleClose(index)}}>
-                                        <CloseIcon style={{color: 'white', fontSize: 40}}/>
+                                      <IconButton style={{ width: 'fit-content', padding: 0, minWidth: 0, position: 'absolute', top: 0, left: 0 }} onClick={() => { handleClose(index) }}>
+                                        <CloseIcon style={{ color: 'white', fontSize: 40 }} />
                                       </IconButton>
                                     </div>
                                   </Fade>
@@ -160,7 +170,7 @@ const MessageList = () => {
                                         <GetAppIcon style={{ fontSize: 16, color: `${mes.sender.name === user.name ? 'white' : 'black'}`, margin: 'auto' }} />
                                       </Grid>
                                       <Grid item xs style={{ display: 'flex' }}>
-                                        <a href={mes.file.blob} target="_self" download={mes.file.name} style={{ textDecoration: 'none', margin: 'auto' }}>{mes.file.name}</a>
+                                        <a href={mes.file.blob} target="_self" download={mes.file.name} style={{ textDecoration: 'none', margin: 'auto', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '12vw', }}>{mes.file.name}</a>
                                       </Grid>
 
                                     </Grid>
@@ -175,18 +185,21 @@ const MessageList = () => {
 
 
                       ) : (<div className={`message ${classes.message}`}>
-                        <p>{mes.message}</p>
+                        <p style={{ margin: '7px 5px' }}>{mes.message}</p>
                       </div>)}
                       <div className="time" style={{ display: 'flex', marginLeft: 10 }}><p style={{ fontSize: 'small', color: 'rgba(0, 0, 0, 0.4)', margin: 'auto' }}>{getTime(new Date(mes.time))}</p></div>
                     </div>
                   )}
+
               </div>
             )
           })
+
         ) : (
             <div>Say hi to your partner</div>
           )
       }
+
     </div>
   )
 }
@@ -209,23 +222,25 @@ const Messages = (props) => {
   }, [activeChat.messages.length])
 
   return (
-    <div>
-      <div className="thread-container">
-        <div className="thread">
-          <MessageList />
-          <div className="typing-indicator-container" style={{ height: 30 }}>
-            {
-              store.getState().chatReducer.activeChat.typingUsers.map((name) => {
-                return (
-                  <TypingIndicator key={activeChat._id} typing={`${name} is typing`} />
-                )
-              })
-            }
-          </div>
-          <div ref={messagesEndRef} />
+    <div className="thread-container">
+      <div className="thread">
+        <MessageList />
+
+        <div className="typing-indicator-container" style={{ height: 40 }}>
+          {
+            store.getState().chatReducer.activeChat.typingUsers.map((name) => {
+              return (
+                <TypingIndicator key={activeChat._id} typing={`${name} is typing`} />
+              )
+            })
+          }
         </div>
+        <div ref={messagesEndRef} />
+
       </div>
+
     </div>
+
 
   )
 }
